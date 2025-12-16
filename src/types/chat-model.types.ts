@@ -98,6 +98,9 @@ export const chatModelSchema = z.discriminatedUnion('providerType', [
   z.object({
     providerType: z.literal('claude-code'),
     ...baseChatModelSchema.shape,
+    thinkingLevel: z
+      .enum(['none', 'think', 'megathink', 'ultrathink'])
+      .optional(),
   }),
 ])
 

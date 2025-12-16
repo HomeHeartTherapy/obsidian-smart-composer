@@ -432,29 +432,79 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
     model: 'morph-v0',
   },
   // Claude Code models (using Max/Pro subscription via CLI)
+  // Standard models - no extended thinking
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/opus-4.5',
     model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'none',
   },
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/sonnet-4.5',
     model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'none',
   },
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/sonnet-4',
     model: 'claude-sonnet-4-20250514',
+    thinkingLevel: 'none',
   },
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/haiku-4.5',
     model: 'claude-haiku-4-5-20251001',
+    thinkingLevel: 'none',
+  },
+  // Extended thinking models - "think" (~4k tokens thinking budget)
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-think',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'think',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-think',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'think',
+  },
+  // Extended thinking models - "megathink" (~10k tokens thinking budget)
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-megathink',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'megathink',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-megathink',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'megathink',
+  },
+  // Extended thinking models - "ultrathink" (maximum thinking budget)
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-ultrathink',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'ultrathink',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-ultrathink',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'ultrathink',
   },
 ]
 

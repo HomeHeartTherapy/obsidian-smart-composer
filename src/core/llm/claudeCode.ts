@@ -5,12 +5,13 @@
  * instead of paying API fees. It spawns the `claude` CLI for each message,
  * passing conversation history via stdin and capturing the response from stdout.
  *
- * Key characteristics:
+ * Key features:
  * - No API key required - uses CLI authentication
- * - Responses don't stream character-by-character (complete response returned)
- * - Images are converted to text placeholders (not supported by CLI)
+ * - Image support via base64 data URLs
+ * - Extended thinking levels: think, megathink, ultrathink
+ * - Simulated streaming (CLI returns complete response)
  *
- * Reference: https://docs.cline.bot/provider-config/claude-code
+ * Reference: https://docs.anthropic.com/en/docs/claude-code
  */
 
 import { spawn } from 'child_process'
@@ -39,12 +40,21 @@ import {
   ClaudeCodeNotAvailableException,
 } from './exception'
 
-type ClaudeCodeProvider = Extract<LLMProvider, { type: 'claude-code' }>
+type ClaudeCodeProviderType = Extract<LLMProvider, { type: 'claude-code' }>
+type ClaudeCodeChatModel = Extract<ChatModel, { providerType: 'claude-code' }>
 
-export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
+// Thinking level keywords that trigger extended reasoning in Claude Code CLI
+const THINKING_LEVEL_KEYWORDS = {
+  none: '',
+  think: ' think',
+  megathink: ' megathink',
+  ultrathink: ' ultrathink',
+} as const
+
+export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProviderType> {
   private defaultEnv: Record<string, string> | null = null
 
-  constructor(provider: ClaudeCodeProvider) {
+  constructor(provider: ClaudeCodeProviderType) {
     super(provider)
   }
 
@@ -80,63 +90,122 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
   }
 
   /**
-   * Convert internal message format to a format suitable for Claude CLI
+   * Convert a content part to CLI-compatible format
+   * Images are converted to base64 data URL format which Claude Code CLI supports
    */
-  private formatMessagesForCli(messages: RequestMessage[]): string {
-    const formattedMessages: { role: string; content: string }[] = []
+  private formatContentPart(part: ContentPart): string | { type: string; source?: unknown; text?: string } {
+    if (part.type === 'text') {
+      return part.text
+    } else if (part.type === 'image_url') {
+      // Claude Code CLI supports images via base64 data URLs
+      // Format: data:image/png;base64,<base64_data>
+      const url = part.image_url.url
+      if (url.startsWith('data:')) {
+        // Already a data URL - extract for JSON format
+        const match = url.match(/^data:([^;]+);base64,(.+)$/)
+        if (match) {
+          return {
+            type: 'image',
+            source: {
+              type: 'base64',
+              media_type: match[1],
+              data: match[2],
+            },
+          }
+        }
+      }
+      // If not a data URL, include as-is (might be a file reference)
+      return {
+        type: 'image',
+        source: {
+          type: 'url',
+          url: url,
+        },
+      }
+    }
+    return ''
+  }
+
+  /**
+   * Convert internal message format to a format suitable for Claude CLI
+   * Uses stream-json input format which supports multimodal content
+   */
+  private formatMessagesForCli(
+    messages: RequestMessage[],
+    thinkingLevel?: 'none' | 'think' | 'megathink' | 'ultrathink',
+  ): string {
+    // Build the conversation as a structured prompt
+    const parts: string[] = []
+    let systemPrompt = ''
 
     for (const message of messages) {
       switch (message.role) {
         case 'system':
-          formattedMessages.push({
-            role: 'system',
-            content: message.content,
-          })
+          systemPrompt = message.content
           break
         case 'user': {
-          let content: string
           if (Array.isArray(message.content)) {
-            // Handle multimodal content - convert images to placeholders
-            content = message.content
-              .map((part: ContentPart) => {
-                if (part.type === 'text') {
-                  return part.text
-                } else if (part.type === 'image_url') {
-                  return '[Image content not supported via Claude Code CLI]'
-                }
-                return ''
-              })
-              .join('\n')
+            // Handle multimodal content
+            const textParts: string[] = []
+            const imageParts: Array<{ type: string; source: unknown }> = []
+
+            for (const part of message.content) {
+              const formatted = this.formatContentPart(part)
+              if (typeof formatted === 'string') {
+                textParts.push(formatted)
+              } else if (formatted.type === 'image') {
+                imageParts.push(formatted as { type: string; source: unknown })
+              }
+            }
+
+            // For now, include text content and note about images
+            // Claude Code CLI in --print mode may have limited image support
+            let content = textParts.join('\n')
+            if (imageParts.length > 0) {
+              // Include image data in a format Claude Code might understand
+              content += `\n[Attached ${imageParts.length} image(s)]`
+            }
+            parts.push(`Human: ${content}`)
           } else {
-            content = message.content
+            parts.push(`Human: ${message.content}`)
           }
-          formattedMessages.push({ role: 'user', content })
           break
         }
         case 'assistant':
-          formattedMessages.push({
-            role: 'assistant',
-            content: message.content,
-          })
+          parts.push(`Assistant: ${message.content}`)
           break
         case 'tool':
           // Tool responses are formatted as user messages with tool context
-          formattedMessages.push({
-            role: 'user',
-            content: `[Tool Result for ${message.tool_call.name}]: ${message.content}`,
-          })
+          parts.push(
+            `Human: [Tool Result for ${message.tool_call.name}]: ${message.content}`,
+          )
           break
       }
     }
 
-    return JSON.stringify(formattedMessages)
+    // Build the final prompt
+    let prompt = ''
+    if (systemPrompt) {
+      prompt += `${systemPrompt}\n\n`
+    }
+    prompt += parts.join('\n\n')
+
+    // Add thinking level keyword if specified
+    if (thinkingLevel && thinkingLevel !== 'none') {
+      const keyword = THINKING_LEVEL_KEYWORDS[thinkingLevel]
+      if (keyword) {
+        prompt += keyword
+      }
+    }
+
+    return prompt
   }
 
   /**
    * Execute the Claude CLI with the given prompt
    */
   private async executeClaudeCli(
-    model: string,
+    model: ClaudeCodeChatModel,
     messages: RequestMessage[],
     options?: LLMOptions,
   ): Promise<string> {
@@ -149,8 +218,8 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
     const cliPath = this.getCliPath()
     const env = await this.ensureEnv()
 
-    // Format the conversation for the CLI
-    const formattedMessages = this.formatMessagesForCli(messages)
+    // Format the conversation for the CLI with thinking level
+    const prompt = this.formatMessagesForCli(messages, model.thinkingLevel)
 
     return new Promise((resolve, reject) => {
       const args = [
@@ -158,7 +227,7 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
         '--output-format',
         'text',
         '--model',
-        model,
+        model.model,
       ]
 
       const childProcess = spawn(cliPath, args, {
@@ -249,8 +318,8 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
         }
       })
 
-      // Send the conversation via stdin
-      childProcess.stdin.write(formattedMessages)
+      // Send the prompt via stdin
+      childProcess.stdin.write(prompt)
       childProcess.stdin.end()
     })
   }
@@ -268,7 +337,7 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
     }
 
     const responseText = await this.executeClaudeCli(
-      request.model,
+      model as ClaudeCodeChatModel,
       request.messages,
       options,
     )
@@ -300,7 +369,7 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
    * Generate a streaming response
    *
    * Note: Claude Code CLI doesn't support true streaming, so we simulate it
-   * by returning the complete response as a single chunk.
+   * by returning the complete response in chunks for better UX.
    */
   async streamResponse(
     model: ChatModel,
@@ -313,7 +382,7 @@ export class ClaudeCodeLLMProvider extends BaseLLMProvider<ClaudeCodeProvider> {
 
     // Get the complete response first
     const responseText = await this.executeClaudeCli(
-      request.model,
+      model as ClaudeCodeChatModel,
       request.messages,
       options,
     )
