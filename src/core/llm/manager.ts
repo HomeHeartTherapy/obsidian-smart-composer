@@ -5,6 +5,7 @@ import { LLMProvider } from '../../types/provider.types'
 import { AnthropicProvider } from './anthropic'
 import { AzureOpenAIProvider } from './azureOpenaiProvider'
 import { BaseLLMProvider } from './base'
+import { ClaudeCodeProvider } from './claudeCode'
 import { DeepSeekStudioProvider } from './deepseekStudioProvider'
 import { LLMModelNotFoundException } from './exception'
 import { GeminiProvider } from './gemini'
@@ -75,6 +76,9 @@ export function getProviderClient({
     }
     case 'openai-compatible': {
       return new OpenAICompatibleProvider(provider)
+    }
+    case 'claude-code': {
+      return new ClaudeCodeProvider(provider)
     }
   }
 }

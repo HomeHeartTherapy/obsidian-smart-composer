@@ -89,6 +89,15 @@ export const llmProviderSchema = z.discriminatedUnion('type', [
       })
       .optional(),
   }),
+  z.object({
+    type: z.literal('claude-code'),
+    ...baseLlmProviderSchema.shape,
+    additionalSettings: z
+      .object({
+        cliPath: z.string().optional(),
+      })
+      .optional(),
+  }),
 ])
 
 export type LLMProvider = z.infer<typeof llmProviderSchema>

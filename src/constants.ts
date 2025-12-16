@@ -147,6 +147,24 @@ export const PROVIDER_TYPES_INFO = {
       },
     ],
   },
+  'claude-code': {
+    label: 'Claude Code (Max/Pro Subscription)',
+    defaultProviderId: 'claude-code',
+    requireApiKey: false,
+    requireBaseUrl: false,
+    supportEmbedding: false,
+    additionalSettings: [
+      {
+        label: 'CLI Path',
+        key: 'cliPath',
+        type: 'text',
+        placeholder: 'claude (default, uses system PATH)',
+        required: false,
+        description:
+          'Path to the Claude Code CLI executable. Leave empty to use "claude" from system PATH.',
+      },
+    ],
+  },
 } as const satisfies Record<
   LLMProviderType,
   {
@@ -216,6 +234,10 @@ export const DEFAULT_PROVIDERS: readonly LLMProvider[] = [
     type: 'morph',
     id: PROVIDER_TYPES_INFO.morph.defaultProviderId,
   },
+  {
+    type: 'claude-code',
+    id: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+  },
 ]
 
 /**
@@ -247,6 +269,31 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
     providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
     id: 'claude-haiku-4.5',
     model: 'claude-haiku-4-5',
+  },
+  // Claude Code models (uses Max/Pro subscription via CLI)
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5',
+    model: 'claude-opus-4-5-20251101',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5',
+    model: 'claude-sonnet-4-5-20250929',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4',
+    model: 'claude-sonnet-4-20250514',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/haiku-4.5',
+    model: 'claude-haiku-4-5-20251001',
   },
   {
     providerType: 'openai',
