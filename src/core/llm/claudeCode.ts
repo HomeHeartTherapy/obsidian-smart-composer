@@ -56,10 +56,29 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
   }
 
   /**
+   * Thinking level trigger words for Claude Code
+   * These keywords activate different thinking budgets in Claude Code CLI
+   */
+  private static readonly THINKING_TRIGGERS: Record<string, string> = {
+    none: '', // No trigger, normal mode
+    low: 'Think about this: ', // ~4,000 tokens
+    medium: 'Think hard about this: ', // ~10,000 tokens
+    high: 'Think harder about this: ', // ~20,000 tokens
+    max: 'Ultrathink: ', // ~31,999 tokens (maximum)
+  }
+
+  /**
    * Convert request messages to a single prompt string for the CLI
    */
-  private static formatMessagesAsPrompt(messages: RequestMessage[]): string {
+  private static formatMessagesAsPrompt(
+    messages: RequestMessage[],
+    thinkingLevel?: string,
+  ): string {
     const parts: string[] = []
+
+    // Add thinking trigger if specified
+    const trigger =
+      ClaudeCodeProvider.THINKING_TRIGGERS[thinkingLevel || 'none'] || ''
 
     for (const message of messages) {
       switch (message.role) {
@@ -87,7 +106,9 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
       }
     }
 
-    return parts.join('\n')
+    // Prepend thinking trigger to the prompt
+    const basePrompt = parts.join('\n')
+    return trigger ? `${trigger}${basePrompt}` : basePrompt
   }
 
   /**
@@ -252,7 +273,11 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
       throw new Error('Model is not a Claude Code model')
     }
 
-    const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(request.messages)
+    const thinkingLevel = model.thinkingLevel
+    const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(
+      request.messages,
+      thinkingLevel,
+    )
     const response = await this.executeClaudeCli(
       prompt,
       request.model,
@@ -293,7 +318,11 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
 
     // Claude Code CLI doesn't support true streaming
     // We get the complete response and yield it as a single chunk
-    const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(request.messages)
+    const thinkingLevel = model.thinkingLevel
+    const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(
+      request.messages,
+      thinkingLevel,
+    )
     const response = await this.executeClaudeCli(
       prompt,
       request.model,

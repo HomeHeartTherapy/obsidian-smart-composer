@@ -84,13 +84,27 @@ Use your Claude Max or Pro subscription instead of paying API fees:
 
 1. Open Settings > Smart Composer
 2. The **claude-code** provider should already be available
-3. Select one of these models:
-   - `claude-code/opus-4.5` - Claude Opus 4.5
-   - `claude-code/sonnet-4.5` - Claude Sonnet 4.5
-   - `claude-code/sonnet-4` - Claude Sonnet 4
-   - `claude-code/haiku-4.5` - Claude Haiku 4.5
+3. Select a model from the dropdown - each model has thinking level variants:
+
+| Model | Thinking Level | Description |
+|-------|----------------|-------------|
+| `claude-code/opus-4.5` | None | Fast, standard responses |
+| `claude-code/opus-4.5-think` | Low | Light reasoning (~4k tokens) |
+| `claude-code/opus-4.5-think-hard` | Medium | Deeper reasoning (~10k tokens) |
+| `claude-code/opus-4.5-ultrathink` | Max | Maximum reasoning (~32k tokens) |
+
+Same variants available for: `sonnet-4.5`, `sonnet-4`, and `haiku-4.5`
 
 4. (Optional) Set a custom CLI path if needed
+
+### Thinking Levels Explained
+
+| Level | Trigger | Token Budget | Best For |
+|-------|---------|--------------|----------|
+| None | - | Standard | Quick questions, simple tasks |
+| Low | "think" | ~4,000 | Moderate complexity |
+| Medium | "think hard" | ~10,000 | Complex reasoning |
+| Max | "ultrathink" | ~32,000 | Maximum depth analysis |
 
 ### Limitations
 

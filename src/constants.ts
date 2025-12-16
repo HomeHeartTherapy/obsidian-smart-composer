@@ -271,6 +271,7 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
     model: 'claude-haiku-4-5',
   },
   // Claude Code models (uses Max/Pro subscription via CLI)
+  // Opus 4.5 - with thinking level variants
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
@@ -280,9 +281,53 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-think',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'low',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-think-hard',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'medium',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/opus-4.5-ultrathink',
+    model: 'claude-opus-4-5-20251101',
+    thinkingLevel: 'max',
+  },
+  // Sonnet 4.5 - with thinking level variants
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/sonnet-4.5',
     model: 'claude-sonnet-4-5-20250929',
   },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-think',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'low',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-think-hard',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'medium',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4.5-ultrathink',
+    model: 'claude-sonnet-4-5-20250929',
+    thinkingLevel: 'max',
+  },
+  // Sonnet 4 - with thinking level variants
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
@@ -292,8 +337,51 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
   {
     providerType: 'claude-code',
     providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4-think',
+    model: 'claude-sonnet-4-20250514',
+    thinkingLevel: 'low',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4-think-hard',
+    model: 'claude-sonnet-4-20250514',
+    thinkingLevel: 'medium',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/sonnet-4-ultrathink',
+    model: 'claude-sonnet-4-20250514',
+    thinkingLevel: 'max',
+  },
+  // Haiku 4.5 - with thinking level variants
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
     id: 'claude-code/haiku-4.5',
     model: 'claude-haiku-4-5-20251001',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/haiku-4.5-think',
+    model: 'claude-haiku-4-5-20251001',
+    thinkingLevel: 'low',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/haiku-4.5-think-hard',
+    model: 'claude-haiku-4-5-20251001',
+    thinkingLevel: 'medium',
+  },
+  {
+    providerType: 'claude-code',
+    providerId: PROVIDER_TYPES_INFO['claude-code'].defaultProviderId,
+    id: 'claude-code/haiku-4.5-ultrathink',
+    model: 'claude-haiku-4-5-20251001',
+    thinkingLevel: 'max',
   },
   {
     providerType: 'openai',
