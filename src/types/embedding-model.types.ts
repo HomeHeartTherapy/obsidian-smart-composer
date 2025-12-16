@@ -72,6 +72,10 @@ export const embeddingModelSchema = z.discriminatedUnion('providerType', [
     providerType: z.literal('openai-compatible'),
     ...baseEmbeddingModelSchema.shape,
   }),
+  z.object({
+    providerType: z.literal('claude-code'),
+    ...baseEmbeddingModelSchema.shape,
+  }),
 ])
 
 export type EmbeddingModel = z.infer<typeof embeddingModelSchema>

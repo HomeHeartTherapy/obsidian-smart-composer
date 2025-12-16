@@ -47,3 +47,55 @@ export class LLMModelNotFoundException extends Error {
     this.name = 'LLMModelNotFoundException'
   }
 }
+
+// Claude Code specific exceptions
+
+export class ClaudeCodeCliNotFoundException extends Error {
+  constructor(
+    message: string,
+    public rawError?: Error,
+  ) {
+    super(message)
+    this.name = 'ClaudeCodeCliNotFoundException'
+  }
+}
+
+export class ClaudeCodeNotAuthenticatedException extends Error {
+  constructor(
+    message: string,
+    public rawError?: Error,
+  ) {
+    super(message)
+    this.name = 'ClaudeCodeNotAuthenticatedException'
+  }
+}
+
+export class ClaudeCodeRateLimitException extends Error {
+  constructor(
+    message: string,
+    public rawError?: Error,
+  ) {
+    super(message)
+    this.name = 'ClaudeCodeRateLimitException'
+  }
+}
+
+export class ClaudeCodeExecutionException extends Error {
+  constructor(
+    message: string,
+    public rawError?: Error,
+  ) {
+    super(message)
+    this.name = 'ClaudeCodeExecutionException'
+  }
+}
+
+export class ClaudeCodeNotAvailableException extends Error {
+  constructor(
+    message: string,
+    public rawError?: Error,
+  ) {
+    super(message)
+    this.name = 'ClaudeCodeNotAvailableException'
+  }
+}
