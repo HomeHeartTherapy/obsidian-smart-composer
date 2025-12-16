@@ -227,6 +227,12 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
   {
     providerType: 'anthropic',
     providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-opus-4.5',
+    model: 'claude-opus-4-5-20251101',
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
     id: 'claude-opus-4.1',
     model: 'claude-opus-4-1',
   },
@@ -478,6 +484,7 @@ export const OPENAI_PRICES: Record<string, ModelPricing> = {
 }
 
 export const ANTHROPIC_PRICES: Record<string, ModelPricing> = {
+  'claude-opus-4-5-20251101': { input: 15, output: 75 },
   'claude-opus-4-1': { input: 15, output: 75 },
   'claude-opus-4-0': { input: 15, output: 75 },
   'claude-sonnet-4-5': { input: 3, output: 15 },
