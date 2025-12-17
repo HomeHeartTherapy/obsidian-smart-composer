@@ -50,6 +50,7 @@ export type DefaultChatModels = {
   web_search_options?: {
     search_context_size?: string
   }
+  thinkingLevel?: 'none' | 'low' | 'medium' | 'high' | 'max'
   enable?: boolean
 }[]
 
