@@ -42,12 +42,13 @@
     "prettier": "^3.3.3",
     "ts-jest": "^29.2.5",
     "tslib": "2.4.0",
-    "typescript": "^5.6.2"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "@electric-sql/pglite": "0.2.12",
     "@google/generative-ai": "^0.24.0",
+    "@langchain/core": "^1.1.6",
     "@lexical/clipboard": "^0.17.1",
     "@lexical/react": "^0.17.1",
     "@modelcontextprotocol/sdk": "^1.9.0",

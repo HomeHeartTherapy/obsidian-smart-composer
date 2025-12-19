@@ -1,0 +1,248 @@
+{
+  "version": "1.0.0",
+  "generated": "2024-12-18",
+  "description": "Machine-readable tag index for documentation discovery",
+  "tags": {
+    "#ai": [
+      "docs/_ai/CONTEXT_PRIMER.md",
+      "docs/_ai/CODEBASE_MAP.md",
+      "docs/_ai/COMMON_TASKS.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#api": [
+      "API_REFERENCE.md"
+    ],
+    "#architecture": [
+      "ARCHITECTURE.md",
+      "ADR.md"
+    ],
+    "#components": [
+      "COMPONENT_SPEC.md"
+    ],
+    "#database": [
+      "DATABASE_SPEC.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#decisions": [
+      "ADR.md"
+    ],
+    "#diagrams": [
+      "ARCHITECTURE.md",
+      "FLOW_DIAGRAMS.md"
+    ],
+    "#drizzle": [
+      "DATABASE_SPEC.md",
+      "docs/database/drizzle/README.md"
+    ],
+    "#faq": [
+      "docs/_human/FAQ.md"
+    ],
+    "#flows": [
+      "FLOW_DIAGRAMS.md"
+    ],
+    "#glossary": [
+      "docs/_human/GLOSSARY.md"
+    ],
+    "#gotchas": [
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#hnsw": [
+      "DATABASE_SPEC.md",
+      "ADR.md"
+    ],
+    "#howto": [
+      "docs/_ai/COMMON_TASKS.md"
+    ],
+    "#lexical": [
+      "COMPONENT_SPEC.md",
+      "docs/ui/lexical/README.md"
+    ],
+    "#llm": [
+      "ARCHITECTURE.md",
+      "API_REFERENCE.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#mcp": [
+      "ARCHITECTURE.md",
+      "FLOW_DIAGRAMS.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#migrations": [
+      "docs/_ai/COMMON_TASKS.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#onboarding": [
+      "docs/_human/GETTING_STARTED.md"
+    ],
+    "#pglite": [
+      "DATABASE_SPEC.md",
+      "ADR.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#pgvector": [
+      "DATABASE_SPEC.md",
+      "ADR.md"
+    ],
+    "#pitfalls": [
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#primer": [
+      "docs/_ai/CONTEXT_PRIMER.md"
+    ],
+    "#priority": [
+      "docs/_meta/PRIORITY_MATRIX.md"
+    ],
+    "#product": [
+      "PRD.md"
+    ],
+    "#providers": [
+      "ARCHITECTURE.md",
+      "API_REFERENCE.md",
+      "docs/_ai/COMMON_TASKS.md"
+    ],
+    "#react": [
+      "COMPONENT_SPEC.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#references": [
+      "DOCUMENTATION_REFERENCES.md"
+    ],
+    "#schema": [
+      "DATABASE_SPEC.md",
+      "API_REFERENCE.md"
+    ],
+    "#settings": [
+      "API_REFERENCE.md",
+      "docs/_ai/COMMON_TASKS.md",
+      "docs/_ai/GOTCHAS.md"
+    ],
+    "#state": [
+      "ARCHITECTURE.md",
+      "COMPONENT_SPEC.md"
+    ],
+    "#tasks": [
+      "docs/_ai/COMMON_TASKS.md"
+    ],
+    "#terms": [
+      "docs/_human/GLOSSARY.md"
+    ],
+    "#tools": [
+      "ARCHITECTURE.md",
+      "FLOW_DIAGRAMS.md"
+    ],
+    "#troubleshooting": [
+      "docs/_ai/GOTCHAS.md",
+      "docs/_human/FAQ.md"
+    ],
+    "#types": [
+      "API_REFERENCE.md"
+    ],
+    "#vectors": [
+      "DATABASE_SPEC.md",
+      "ADR.md"
+    ],
+    "#wasm": [
+      "DATABASE_SPEC.md",
+      "ADR.md"
+    ],
+    "#zod": [
+      "API_REFERENCE.md",
+      "ADR.md"
+    ]
+  },
+  "keywords": {
+    "embedding": ["#vectors", "#llm", "#database"],
+    "similarity": ["#vectors", "#database"],
+    "streaming": ["#llm", "#api"],
+    "migration": ["#database", "#settings", "#migrations"],
+    "plugin": ["#architecture", "#onboarding"],
+    "provider": ["#llm", "#providers", "#api"],
+    "context": ["#react", "#state"],
+    "component": ["#react", "#components"],
+    "chat": ["#components", "#flows"],
+    "template": ["#database", "#components"],
+    "tool": ["#mcp", "#tools"],
+    "server": ["#mcp", "#tools"],
+    "vault": ["#database", "#vectors"],
+    "index": ["#database", "#vectors", "#hnsw"],
+    "query": ["#database", "#vectors"],
+    "error": ["#gotchas", "#troubleshooting"],
+    "bug": ["#gotchas", "#troubleshooting"],
+    "fix": ["#gotchas", "#howto"],
+    "add": ["#howto", "#tasks"],
+    "create": ["#howto", "#tasks"],
+    "debug": ["#gotchas", "#troubleshooting"]
+  },
+  "files": {
+    "ARCHITECTURE.md": {
+      "tags": ["#architecture", "#diagrams", "#llm", "#mcp", "#state"],
+      "priority": "P0",
+      "audience": ["ai", "human"]
+    },
+    "ADR.md": {
+      "tags": ["#decisions", "#architecture", "#pglite", "#drizzle", "#zod"],
+      "priority": "P0",
+      "audience": ["ai", "human"]
+    },
+    "API_REFERENCE.md": {
+      "tags": ["#api", "#types", "#llm", "#settings", "#schema"],
+      "priority": "P1",
+      "audience": ["ai", "human"]
+    },
+    "COMPONENT_SPEC.md": {
+      "tags": ["#components", "#react", "#lexical", "#state"],
+      "priority": "P1",
+      "audience": ["ai", "human"]
+    },
+    "DATABASE_SPEC.md": {
+      "tags": ["#database", "#pglite", "#pgvector", "#drizzle", "#schema"],
+      "priority": "P1",
+      "audience": ["ai", "human"]
+    },
+    "FLOW_DIAGRAMS.md": {
+      "tags": ["#flows", "#diagrams", "#mcp", "#tools"],
+      "priority": "P2",
+      "audience": ["ai", "human"]
+    },
+    "PRD.md": {
+      "tags": ["#product"],
+      "priority": "P2",
+      "audience": ["human"]
+    },
+    "docs/_ai/CONTEXT_PRIMER.md": {
+      "tags": ["#ai", "#primer", "#architecture"],
+      "priority": "P0",
+      "audience": ["ai"]
+    },
+    "docs/_ai/CODEBASE_MAP.md": {
+      "tags": ["#ai", "#architecture"],
+      "priority": "P0",
+      "audience": ["ai"]
+    },
+    "docs/_ai/COMMON_TASKS.md": {
+      "tags": ["#howto", "#tasks", "#providers", "#settings", "#migrations"],
+      "priority": "P1",
+      "audience": ["ai", "human"]
+    },
+    "docs/_ai/GOTCHAS.md": {
+      "tags": ["#gotchas", "#pitfalls", "#troubleshooting"],
+      "priority": "P1",
+      "audience": ["ai", "human"]
+    },
+    "docs/_human/GETTING_STARTED.md": {
+      "tags": ["#onboarding"],
+      "priority": "P0",
+      "audience": ["human"]
+    },
+    "docs/_human/GLOSSARY.md": {
+      "tags": ["#glossary", "#terms"],
+      "priority": "P2",
+      "audience": ["human"]
+    },
+    "docs/_human/FAQ.md": {
+      "tags": ["#faq", "#troubleshooting"],
+      "priority": "P2",
+      "audience": ["human"]
+    }
+  }
+}
