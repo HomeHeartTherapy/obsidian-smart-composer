@@ -406,4 +406,79 @@ controller.abort()
 
 ---
 
-*Last Updated: December 2024*
+## Obsidian Plugin Deployment
+
+### Chromium Code Cache Blocks Plugin Updates
+**Problem**: Obsidian uses Chromium/Electron, which caches compiled JavaScript at the V8 level.
+
+**Symptom**: Plugin changes don't appear despite:
+- Updated main.js with correct content (verified by MD5)
+- Multiple Obsidian restarts
+- Plugin disable/enable cycles
+
+**Cause**: Each vault has its own cache partition at:
+```
+C:\Users\{user}\AppData\Roaming\obsidian\Partitions\vault-{id}\
+├── Code Cache\   <- Compiled JS cache (THE CULPRIT)
+├── Cache\        <- General cache
+└── ...
+```
+
+Vault IDs are mapped in `obsidian.json`:
+```json
+{"vaults": {"27bf24272b1bc5cb": {"path": "C:\\wcm-sync"}}}
+```
+
+**Solution - Full Cache Flush**:
+```powershell
+# 1. Close Obsidian completely (check Task Manager)
+
+# 2. Rename workspace to force state refresh
+cd C:\{vault}\.obsidian
+ren workspace.json workspace.json.bak
+
+# 3. Clear vault-specific Code Cache (replace {vault-id} with actual ID)
+Remove-Item -Recurse "C:\Users\{user}\AppData\Roaming\obsidian\Partitions\vault-{vault-id}\Code Cache\*" -Force
+
+# 4. Optionally clear general cache too
+Remove-Item -Recurse "C:\Users\{user}\AppData\Roaming\obsidian\Partitions\vault-{vault-id}\Cache\*" -Force
+
+# 5. Restart Obsidian
+```
+
+**Finding Vault ID**:
+```powershell
+cat "$env:APPDATA\obsidian\obsidian.json"
+```
+
+---
+
+### Plugin Files Not Updating After Build
+**Problem**: Obsidian caches plugin files even after copying new versions.
+
+**Symptom**: Old UI/behavior persists after deploying new build.
+
+**Solution**:
+1. Delete entire plugin folder first
+2. Copy fresh files
+3. Clear Code Cache (see above)
+4. Restart Obsidian
+
+---
+
+### Workspace.json Caches View State
+**Problem**: Old plugin view state persists in workspace.json.
+
+**Symptom**: Plugin panel shows old layout despite new code.
+
+**Solution**: Rename workspace.json before restart:
+```powershell
+cd C:\{vault}\.obsidian
+ren workspace.json workspace.json.bak
+```
+
+Obsidian will recreate it fresh on startup.
+
+---
+
+*Last Updated: 2024-12-19*

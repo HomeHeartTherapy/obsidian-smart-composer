@@ -230,11 +230,36 @@
 
 .smtcmp-chat-user-input-controls {
   display: flex;
-  flex-direction: row;
-  gap: var(--size-4-1);
-  justify-content: space-between;
-  align-items: center;
-  height: var(--size-4-4);
+  flex-direction: column;
+  gap: var(--size-2-1);
+  padding-top: var(--size-2-1);
+
+  .smtcmp-chat-user-input-controls__row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--size-4-1);
+    min-height: var(--size-4-4);
+  }
+
+  .smtcmp-chat-user-input-controls__row--1 {
+    justify-content: flex-start;
+  }
+
+  .smtcmp-chat-user-input-controls__provider-group {
+    display: flex;
+    gap: var(--size-2-1);
+    align-items: center;
+  }
+
+  .smtcmp-chat-user-input-controls__model-group {
+    display: flex;
+    gap: var(--size-4-1);
+    align-items: center;
+    flex-shrink: 1;
+    overflow: hidden;
+  }
 
   .smtcmp-chat-user-input-controls__model-select-container {
     flex-shrink: 1;
@@ -762,6 +787,138 @@ button.smtcmp-chat-input-model-select {
     align-items: center;
     justify-content: center;
   }
+}
+
+/* Provider Select Dropdown */
+button.smtcmp-chat-input-provider-select {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  background-color: var(--background-secondary) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  border-radius: var(--radius-s) !important;
+  padding: var(--size-2-1) var(--size-2-2) !important;
+  font-size: var(--font-smallest) !important;
+  font-weight: var(--font-medium) !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  height: auto !important;
+
+  &:hover {
+    color: var(--text-normal) !important;
+    background-color: var(--background-modifier-hover) !important;
+  }
+
+  .smtcmp-chat-input-provider-select__name {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .smtcmp-chat-input-provider-select__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Connection Type Select Dropdown */
+button.smtcmp-chat-input-connection-select {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  background-color: var(--background-secondary) !important;
+  box-shadow: none !important;
+  border: 1px solid var(--background-modifier-border) !important;
+  border-radius: var(--radius-s) !important;
+  padding: var(--size-2-1) var(--size-2-2) !important;
+  font-size: var(--font-smallest) !important;
+  font-weight: var(--font-medium) !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  height: auto !important;
+
+  &:hover {
+    color: var(--text-normal) !important;
+    background-color: var(--background-modifier-hover) !important;
+  }
+
+  .smtcmp-chat-input-connection-select__name {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .smtcmp-chat-input-connection-select__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Thinking Level Select Dropdown */
+button.smtcmp-chat-input-thinking-select {
+  display: flex;
+  align-items: center;
+  gap: var(--size-2-1);
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  padding: 0 !important;
+  font-size: var(--font-smallest) !important;
+  font-weight: var(--font-medium) !important;
+  color: var(--text-muted) !important;
+  cursor: pointer !important;
+  height: auto !important;
+
+  &:hover {
+    color: var(--text-normal) !important;
+  }
+
+  .smtcmp-chat-input-thinking-select__icon {
+    flex-shrink: 0;
+    color: var(--text-accent);
+  }
+
+  .smtcmp-chat-input-thinking-select__level {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .smtcmp-chat-input-thinking-select__chevron {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Popover header for dropdowns */
+.smtcmp-popover-header {
+  padding: var(--size-2-2) var(--size-4-2);
+  font-size: var(--font-smallest);
+  font-weight: var(--font-semibold);
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+/* Selected item in popover */
+.smtcmp-popover-item--selected {
+  background-color: var(--background-modifier-hover);
+  font-weight: var(--font-semibold);
+}
+
+/* Disabled item in popover */
+.smtcmp-popover-item--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .smtcmp-query-progress {

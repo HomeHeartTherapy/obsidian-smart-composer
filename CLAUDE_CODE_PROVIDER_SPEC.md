@@ -1,9 +1,9 @@
 # Claude Code Provider - Complete Technical Specification
 
-**Document Version:** 2.0
-**Date:** 2025-12-17
-**Status:** IMPLEMENTATION COMPLETE - Awaiting Production Verification
-**Schema Version:** 13 (upgraded from 12)
+**Document Version:** 2.1
+**Date:** 2025-12-19
+**Status:** PRODUCTION VERIFIED - Working in Obsidian
+**Schema Version:** 14 (upgraded from 13)
 
 ---
 
@@ -15,13 +15,15 @@ This document specifies the implementation of a Claude Code provider for the Sma
 
 | Component | Status | Verified |
 |-----------|--------|----------|
-| Provider class (`claudeCode.ts`) | DONE | Build passes |
-| Type definitions (Zod schemas) | DONE | Build passes |
-| Constants (models, provider info) | DONE | Build passes |
-| Manager registration | DONE | Build passes |
-| Settings migration (12→13) | DONE | Build passes |
+| Provider class (`claudeCode.ts`) | DONE | Production verified |
+| Type definitions (Zod schemas) | DONE | Production verified |
+| Constants (models, provider info) | DONE | Production verified |
+| Manager registration | DONE | Production verified |
+| Settings migration (12→13) | DONE | Production verified |
+| Settings migration (13→14) | DONE | Production verified |
+| Debug logging | DONE | Production verified |
 | Unit tests | 114/114 pass | Yes |
-| Production testing | PENDING | User must verify |
+| Production testing | DONE | User verified in Obsidian |
 
 ### Critical Discovery: Settings Migration
 
@@ -43,14 +45,15 @@ This document specifies the implementation of a Claude Code provider for the Sma
 8. [CLI Execution](#8-cli-execution)
 9. [Error Handling](#9-error-handling)
 10. [Testing Strategy](#10-testing-strategy)
-11. [Known Issues & Debugging](#11-known-issues--debugging)
-12. [External References](#12-external-references)
-13. [Architectural Decision Records (ADRs)](#13-architectural-decision-records-adrs)
-14. [Verified Correct Implementation](#14-verified-correct-implementation)
-15. [Known Type Inconsistencies](#15-known-type-inconsistencies)
-16. [Defensive Debugging Guide](#16-defensive-debugging-guide)
-17. [Tools & Resources for Debugging](#17-tools--resources-for-debugging)
-18. [Future Session Recovery](#18-future-session-recovery)
+11. [Debug Logging](#11-debug-logging)
+12. [Known Issues & Debugging](#12-known-issues--debugging)
+13. [External References](#13-external-references)
+14. [Architectural Decision Records (ADRs)](#14-architectural-decision-records-adrs)
+15. [Verified Correct Implementation](#15-verified-correct-implementation)
+16. [Known Type Inconsistencies](#16-known-type-inconsistencies)
+17. [Defensive Debugging Guide](#17-defensive-debugging-guide)
+18. [Tools & Resources for Debugging](#18-tools--resources-for-debugging)
+19. [Future Session Recovery](#19-future-session-recovery)
 
 ---
 
@@ -775,7 +778,77 @@ if (!Platform.isDesktop) {
 
 ---
 
-## 11. Known Issues & Debugging
+## 11. Debug Logging
+
+### 11.1 Purpose
+
+Debug logging allows users to verify which model is actually being called and what thinking configuration is active. LLMs cannot reliably self-identify, so console logging provides ground truth.
+
+### 11.2 Implementation
+
+Both providers log to the browser console when a request is made:
+
+**Anthropic Provider (`src/core/llm/anthropic.ts`):**
+```typescript
+const thinkingLabel = AnthropicProvider.getThinkingLabel(model.thinking)
+console.log(`[Anthropic Provider] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+```
+
+**Claude Code Provider (`src/core/llm/claudeCode.ts`):**
+```typescript
+const thinkingLabel = ClaudeCodeProvider.getThinkingLabel(thinkingLevel)
+console.log(`[Claude Code] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+```
+
+### 11.3 Output Format
+
+**Anthropic Provider Examples:**
+```
+[Anthropic Provider] Model: claude-opus-4-5-20251101 | Thinking: OFF
+[Anthropic Provider] Model: claude-haiku-4-5 | Thinking: STANDARD (10k tokens)
+[Anthropic Provider] Model: claude-sonnet-4-5 | Thinking: HIGH (20k tokens)
+[Anthropic Provider] Model: claude-opus-4-5-20251101 | Thinking: MAX (32k tokens)
+```
+
+**Claude Code Provider Examples:**
+```
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: OFF
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: LOW (~4k tokens)
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: MEDIUM (~10k tokens)
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: HIGH (~20k tokens)
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: ULTRATHINK (~32k tokens)
+```
+
+### 11.4 How to View
+
+1. Open Obsidian
+2. Press `Ctrl+Shift+I` to open Developer Tools
+3. Go to **Console** tab
+4. Send a message in Smart Composer
+5. Look for `[Anthropic Provider]` or `[Claude Code]` log lines
+
+### 11.5 Label Mapping
+
+**Anthropic Provider (budget_tokens → label):**
+| Budget | Label |
+|--------|-------|
+| 0 or undefined | OFF |
+| ≤10,000 | STANDARD (Xk tokens) |
+| ≤20,000 | HIGH (Xk tokens) |
+| >20,000 | MAX (Xk tokens) |
+
+**Claude Code Provider (thinkingLevel → label):**
+| Level | Label |
+|-------|-------|
+| undefined/none | OFF |
+| low | LOW (~4k tokens) |
+| medium | MEDIUM (~10k tokens) |
+| high | HIGH (~20k tokens) |
+| max | ULTRATHINK (~32k tokens) |
+
+---
+
+## 12. Known Issues & Debugging
 
 ### 11.1 Models Not Appearing in Dropdown
 

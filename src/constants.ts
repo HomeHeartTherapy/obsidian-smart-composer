@@ -270,6 +270,100 @@ export const DEFAULT_CHAT_MODELS: readonly ChatModel[] = [
     id: 'claude-haiku-4.5',
     model: 'claude-haiku-4-5',
   },
+  // Anthropic API models with Extended Thinking enabled
+  // Opus 4.5 thinking variants
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-opus-4.5-thinking',
+    model: 'claude-opus-4-5-20251101',
+    thinking: {
+      enabled: true,
+      budget_tokens: 10000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-opus-4.5-thinking-high',
+    model: 'claude-opus-4-5-20251101',
+    thinking: {
+      enabled: true,
+      budget_tokens: 20000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-opus-4.5-thinking-max',
+    model: 'claude-opus-4-5-20251101',
+    thinking: {
+      enabled: true,
+      budget_tokens: 32000,
+    },
+  },
+  // Sonnet 4.5 thinking variants
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-sonnet-4.5-thinking',
+    model: 'claude-sonnet-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 10000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-sonnet-4.5-thinking-high',
+    model: 'claude-sonnet-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 20000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-sonnet-4.5-thinking-max',
+    model: 'claude-sonnet-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 32000,
+    },
+  },
+  // Haiku 4.5 thinking variants
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-haiku-4.5-thinking',
+    model: 'claude-haiku-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 10000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-haiku-4.5-thinking-high',
+    model: 'claude-haiku-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 20000,
+    },
+  },
+  {
+    providerType: 'anthropic',
+    providerId: PROVIDER_TYPES_INFO.anthropic.defaultProviderId,
+    id: 'claude-haiku-4.5-thinking-max',
+    model: 'claude-haiku-4-5',
+    thinking: {
+      enabled: true,
+      budget_tokens: 32000,
+    },
+  },
   // Claude Code models (uses Max/Pro subscription via CLI)
   // Opus 4.5 - with thinking level variants
   {

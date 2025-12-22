@@ -68,6 +68,24 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
   }
 
   /**
+   * Get human-readable label for thinking level
+   */
+  private static getThinkingLabel(thinkingLevel?: string): string {
+    switch (thinkingLevel) {
+      case 'low':
+        return 'LOW (~4k tokens)'
+      case 'medium':
+        return 'MEDIUM (~10k tokens)'
+      case 'high':
+        return 'HIGH (~20k tokens)'
+      case 'max':
+        return 'ULTRATHINK (~32k tokens)'
+      default:
+        return 'OFF'
+    }
+  }
+
+  /**
    * Convert request messages to a single prompt string for the CLI
    */
   private static formatMessagesAsPrompt(
@@ -129,6 +147,7 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
         modelName,
         prompt,
       ]
+
 
       // Get shell environment for proper PATH resolution
       const shellEnv = this.getShellEnv()
@@ -274,6 +293,11 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
     }
 
     const thinkingLevel = model.thinkingLevel
+
+    // DEBUG: Log the exact model and thinking level being requested
+    const thinkingLabel = ClaudeCodeProvider.getThinkingLabel(thinkingLevel)
+    console.log(`[Claude Code] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+
     const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(
       request.messages,
       thinkingLevel,
@@ -319,6 +343,11 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
     // Claude Code CLI doesn't support true streaming
     // We get the complete response and yield it as a single chunk
     const thinkingLevel = model.thinkingLevel
+
+    // DEBUG: Log the exact model and thinking level being requested
+    const thinkingLabel = ClaudeCodeProvider.getThinkingLabel(thinkingLevel)
+    console.log(`[Claude Code] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+
     const prompt = ClaudeCodeProvider.formatMessagesAsPrompt(
       request.messages,
       thinkingLevel,

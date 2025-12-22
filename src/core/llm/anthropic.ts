@@ -41,6 +41,25 @@ export class AnthropicProvider extends BaseLLMProvider<
 
   private static readonly DEFAULT_MAX_TOKENS = 8192
 
+  /**
+   * Get human-readable label for thinking configuration
+   */
+  private static getThinkingLabel(
+    thinking?: { enabled: boolean; budget_tokens: number },
+  ): string {
+    if (!thinking?.enabled) {
+      return 'OFF'
+    }
+    const budget = thinking.budget_tokens
+    if (budget <= 10000) {
+      return `STANDARD (${(budget / 1000).toFixed(0)}k tokens)`
+    } else if (budget <= 20000) {
+      return `HIGH (${(budget / 1000).toFixed(0)}k tokens)`
+    } else {
+      return `MAX (${(budget / 1000).toFixed(0)}k tokens)`
+    }
+  }
+
   constructor(provider: Extract<LLMProvider, { type: 'anthropic' }>) {
     super(provider)
     this.client = new Anthropic({
@@ -72,6 +91,10 @@ export class AnthropicProvider extends BaseLLMProvider<
     )
 
     try {
+      // DEBUG: Log the exact model being requested with human-readable thinking level
+      const thinkingLabel = AnthropicProvider.getThinkingLabel(model.thinking)
+      console.log(`[Anthropic Provider] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+
       const response = await this.client.messages.create(
         {
           model: request.model,
@@ -166,6 +189,10 @@ https://github.com/glowingjade/obsidian-smart-composer/issues/286`,
     )
 
     try {
+      // DEBUG: Log the exact model being requested with human-readable thinking level (streaming)
+      const thinkingLabel = AnthropicProvider.getThinkingLabel(model.thinking)
+      console.log(`[Anthropic Provider] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+
       const stream = await this.client.messages.create(
         {
           model: request.model,

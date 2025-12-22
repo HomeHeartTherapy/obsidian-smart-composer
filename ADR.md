@@ -1386,6 +1386,272 @@ const results = fuzzysort.go(query, templates, { key: 'name', threshold: 0.2 })
 | 013 | Zod | TypeScript inference + runtime validation |
 | 014 | vscode-diff | Battle-tested, editor-appropriate |
 | 015 | fuzzysort | Fast, good scoring, tiny |
+| 016 | Console Debug Logging | Human-readable model verification |
+| 017 | Extended Thinking Variants | Budget-based thinking for Anthropic API |
+| 018 | Two-Row UI Layout | VS Code Copilot-style dropdown controls |
+
+---
+
+## ADR-016: Console Debug Logging for Model Verification
+
+### Status
+**Accepted**
+
+### Context
+Users selecting models in Smart Composer had no way to verify which model was actually being called. LLMs cannot reliably self-identify (they don't "know" what model they are), leading to user uncertainty about whether their model selection was being honored.
+
+### Decision
+Add **console.log debug messages** to all LLM providers that display:
+1. The exact model ID being sent to the API
+2. The thinking/reasoning configuration in human-readable format
+
+```typescript
+// Anthropic Provider
+console.log(`[Anthropic Provider] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+
+// Claude Code Provider
+console.log(`[Claude Code] Model: ${request.model} | Thinking: ${thinkingLabel}`)
+```
+
+Output examples:
+```
+[Anthropic Provider] Model: claude-opus-4-5-20251101 | Thinking: OFF
+[Anthropic Provider] Model: claude-haiku-4-5 | Thinking: HIGH (20k tokens)
+[Claude Code] Model: claude-opus-4-5-20251101 | Thinking: ULTRATHINK (~32k tokens)
+```
+
+### Rationale
+Console debug logging was chosen because:
+1. **Zero UI impact** - Doesn't clutter the chat interface
+2. **Opt-in visibility** - Users must open DevTools to see it
+3. **Immediate feedback** - Logs appear the moment a request is made
+4. **Human-readable** - Labels like "HIGH (20k tokens)" vs raw numbers
+5. **No performance impact** - Single console.log per request
+
+### Alternatives Considered
+
+#### Toast/Notification in UI
+**Why NOT chosen:**
+- Would clutter the interface for every message
+- Distracting during normal use
+- Not needed once user trusts the system
+
+#### Settings panel indicator
+**Why NOT chosen:**
+- Doesn't show real-time request info
+- Would need state management for "last used model"
+- More complex implementation
+
+#### No verification at all
+**Why NOT chosen:**
+- Users expressed concern about model accuracy
+- "Trust but verify" approach preferred
+- Debugging tool availability is standard practice
+
+### Implementation Notes
+Helper methods convert raw config to labels:
+```typescript
+// Anthropic: budget_tokens → label
+if (budget <= 10000) return 'STANDARD (10k tokens)'
+else if (budget <= 20000) return 'HIGH (20k tokens)'
+else return 'MAX (32k tokens)'
+
+// Claude Code: thinkingLevel → label
+switch (thinkingLevel) {
+  case 'low': return 'LOW (~4k tokens)'
+  case 'medium': return 'MEDIUM (~10k tokens)'
+  case 'high': return 'HIGH (~20k tokens)'
+  case 'max': return 'ULTRATHINK (~32k tokens)'
+  default: return 'OFF'
+}
+```
+
+### Consequences
+- **Positive**: Users can verify model selection with DevTools
+- **Positive**: Useful for debugging provider issues
+- **Negative**: Slightly increases code in hot path
+- **Negative**: Messages may confuse non-technical users who open DevTools
+
+---
+
+## ADR-017: Extended Thinking Variants for Anthropic API
+
+### Status
+**Accepted**
+
+### Context
+Claude Code provider already had thinking level variants (think, think-hard, ultrathink). The standard Anthropic API models did not expose Extended Thinking capability, despite the API supporting it via the `thinking` parameter.
+
+### Decision
+Add **thinking variants** for all Anthropic API models with three budget levels:
+
+| Suffix | Budget | Use Case |
+|--------|--------|----------|
+| `-thinking` | 10,000 tokens | Standard reasoning tasks |
+| `-thinking-high` | 20,000 tokens | Complex analysis |
+| `-thinking-max` | 32,000 tokens | Maximum reasoning depth |
+
+Models added:
+- `claude-opus-4.5-thinking`, `-thinking-high`, `-thinking-max`
+- `claude-sonnet-4.5-thinking`, `-thinking-high`, `-thinking-max`
+- `claude-haiku-4.5-thinking`, `-thinking-high`, `-thinking-max`
+
+### Rationale
+Separate model variants were chosen because:
+1. **Consistent with Claude Code pattern** - Same approach as existing thinking levels
+2. **No UI changes required** - Works with existing model dropdown
+3. **Explicit selection** - User knows exactly what thinking budget they're using
+4. **Migration-friendly** - Settings migration adds new models without breaking existing selections
+
+### Alternatives Considered
+
+#### UI Toggle for Thinking Level
+**Why NOT chosen (for now):**
+- Requires new UI components
+- More complex state management
+- Planned for future (see ROADMAP.md)
+- Model variants work today
+
+#### Single "thinking" model with dynamic budget
+**Why NOT chosen:**
+- Would need new settings field
+- Less explicit about resource usage
+- Harder to compare results between levels
+
+#### No Extended Thinking for Anthropic API
+**Why NOT chosen:**
+- Feature parity with Claude Code provider expected
+- Extended Thinking significantly improves complex reasoning
+- API supports it natively
+
+### Implementation Notes
+Thinking config in model definition:
+```typescript
+{
+  providerType: 'anthropic',
+  id: 'claude-opus-4.5-thinking-high',
+  model: 'claude-opus-4-5-20251101',
+  thinking: {
+    enabled: true,
+    budget_tokens: 20000,
+  },
+}
+```
+
+Passed to Anthropic SDK:
+```typescript
+const response = await this.client.messages.create({
+  model: request.model,
+  thinking: model.thinking,  // SDK handles the rest
+  // ...
+})
+```
+
+### Consequences
+- **Positive**: Full Extended Thinking support for API users
+- **Positive**: Clear budget visibility in model name
+- **Negative**: 9 new model variants in dropdown (may feel cluttered)
+- **Negative**: Token budget not customizable (fixed at 10k/20k/32k)
+
+---
+
+## ADR-018: Two-Row UI Layout for Chat Input
+
+### Status
+**Accepted**
+
+### Context
+The original Smart Composer had a single-row model selector that required users to navigate through a long flat list of models from all providers. As more providers and thinking variants were added (16 providers, 30+ models), this became unwieldy. Users wanted a more intuitive way to:
+1. Select provider first (Claude, ChatGPT, Gemini)
+2. Toggle between connection types (API vs Subscription)
+3. Adjust thinking/reasoning levels independently
+
+### Decision
+Implement a **two-row UI layout** inspired by VS Code Copilot's model selector:
+
+**Row 1:**
+- Provider dropdown (grouped by product: Claude, ChatGPT, Gemini, etc.)
+- Model dropdown (filtered to selected provider)
+- Context file indicators
+
+**Row 2:**
+- Connection type toggle (API/Subscription where applicable)
+- Thinking level dropdown (adapts to provider)
+- Submit button
+
+New components created:
+- `ProviderSelect.tsx` - Provider grouping dropdown
+- `ConnectionTypeSelect.tsx` - API/Subscription toggle
+- `ThinkingSelect.tsx` - Provider-adaptive thinking levels
+
+### Rationale
+The two-row layout was chosen because:
+1. **Provider-first mental model** - Users think "I want Claude" before "I want claude-opus-4-5-20251101"
+2. **Reduced cognitive load** - Only show relevant models for selected provider
+3. **Connection type awareness** - Make API vs Subscription choice explicit
+4. **Thinking level control** - Adjust reasoning depth without changing model variants
+5. **VS Code familiarity** - Users already know this pattern from Copilot
+
+### Alternatives Considered
+
+#### Single Enhanced Dropdown with Grouping
+**Why NOT chosen:**
+- Still requires scrolling through all options
+- No clear separation of concerns
+- Harder to show connection type
+- Thinking level buried in model names
+
+#### Sidebar Settings Panel
+**Why NOT chosen:**
+- Too hidden for frequent access
+- Breaks chat flow
+- Extra clicks required
+- Not inline with input
+
+#### Model Variant Suffixes Only
+**Why NOT chosen:**
+- Leads to combinatorial explosion (model × thinking × connection)
+- Long model names hard to read
+- No visual grouping
+- Already tried this approach
+
+### Implementation Notes
+Provider grouping uses a mapping structure:
+```typescript
+const PROVIDER_GROUPS: Record<string, string[]> = {
+  Claude: ['anthropic', 'claude-code'],
+  ChatGPT: ['openai'],
+  Gemini: ['gemini'],
+  // ...
+}
+```
+
+Thinking options adapt per provider:
+```typescript
+const THINKING_OPTIONS: Record<string, ThinkingOption[]> = {
+  anthropic: [
+    { id: 'off', label: 'OFF' },
+    { id: 'standard', label: 'Standard (10k)' },
+    { id: 'high', label: 'High (20k)' },
+    { id: 'max', label: 'Max (32k)' },
+  ],
+  'claude-code': [
+    { id: 'off', label: 'OFF' },
+    { id: 'low', label: 'Low (~4k)' },
+    { id: 'medium', label: 'Medium (~10k)' },
+    { id: 'high', label: 'High (~20k)' },
+    { id: 'max', label: 'Ultrathink (~32k)' },
+  ],
+  // ...
+}
+```
+
+### Consequences
+- **Positive**: Intuitive provider-first selection
+- **Positive**: Thinking level separate from model selection
+- **Positive**: Easy to switch API/Subscription for same model family
+- **Negative**: More UI components to maintain
+- **Negative**: Need to keep provider groupings updated as new providers added
 
 ---
 

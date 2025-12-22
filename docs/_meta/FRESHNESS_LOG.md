@@ -29,12 +29,16 @@ This log tracks when each document was last reviewed for accuracy. Documentation
 |----------|-------------|--------|----------|-------|
 | README.md | 2024-12-18 | FRESH | AI | Initial creation |
 | ARCHITECTURE.md | 2024-12-18 | FRESH | AI | Comprehensive architecture doc |
-| ADR.md | 2024-12-18 | FRESH | AI | 15 architecture decisions |
+| ADR.md | 2024-12-19 | FRESH | AI | 17 architecture decisions (added ADR-016, ADR-017) |
 | API_REFERENCE.md | 2024-12-18 | FRESH | AI | Full type documentation |
+| CHANGELOG.md | 2024-12-19 | FRESH | AI | **NEW** - Version history |
+| CLAUDE_CODE_PROVIDER_SPEC.md | 2024-12-19 | FRESH | AI | Updated to v2.1 with debug logging |
 | COMPONENT_SPEC.md | 2024-12-18 | FRESH | AI | React component hierarchy |
 | DATABASE_SPEC.md | 2024-12-18 | FRESH | AI | PGlite/pgvector details |
 | FLOW_DIAGRAMS.md | 2024-12-18 | FRESH | AI | User and data flows |
+| INSTALLATION_GUIDE_WINDOWS.md | 2024-12-18 | FRESH | AI | Comprehensive Windows setup |
 | PRD.md | 2024-12-18 | FRESH | AI | Product requirements |
+| ROADMAP.md | 2024-12-19 | FRESH | AI | **NEW** - Future plans |
 | DOCUMENTATION_REFERENCES.md | 2024-12-18 | FRESH | AI | 100+ external doc links |
 
 ### AI Context (docs/_ai/)
@@ -74,6 +78,27 @@ This log tracks when each document was last reviewed for accuracy. Documentation
 ## Update History
 
 ### December 2024
+
+**2024-12-19 (Continued)**: Two-Row UI Layout Implementation
+- Implemented VS Code Copilot-style two-row UI layout
+- Created new components: ProviderSelect, ConnectionTypeSelect, ThinkingSelect
+- Updated ChatUserInput.tsx for two-row integration
+- Added CSS styles for Radix-based dropdowns
+- Created UI_UPGRADE_SPEC.md v2.0 design specification
+- Added ADR-018 (Two-Row UI Design)
+- Built and deployed to wcm-sync vault (manual migration v12→v14)
+- Reconstructed THREAD.md after context compaction
+- Updated all documentation to parity
+
+**2024-12-19 (Earlier)**: Debug Logging & Extended Thinking
+- Added debug logging to Anthropic and Claude Code providers
+- Created CHANGELOG.md with version history
+- Created ROADMAP.md with future plans and technical debt
+- Updated ADR.md with ADR-016 (Console Debug Logging) and ADR-017 (Extended Thinking Variants)
+- Updated CLAUDE_CODE_PROVIDER_SPEC.md to v2.1 with debug logging section
+- Added Anthropic API Extended Thinking variants (9 new models)
+- Added settings migration v13→v14
+- Human-readable console output for model verification
 
 **2024-12-18**: Initial documentation creation
 - Created complete documentation suite
@@ -159,4 +184,4 @@ If code changes affect documentation:
 
 ---
 
-*Last Updated: 2024-12-18*
+*Last Updated: 2024-12-19*
