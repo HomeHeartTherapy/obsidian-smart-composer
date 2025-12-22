@@ -5,6 +5,9 @@
 - **Machine**: HOME (C:\Users\StuartRyan)
 - **Work Machine Profile**: C:\Users\stuart.ryan
 - **Problem**: Claude Code provider not working at home, says "not installed"
+- **Fork Name**: **Power Composer** (renamed from Smart Composer this session)
+- **Owner**: Home Heart, LLC
+- **Contact**: StuartRyan@homehearttherapy.com
 
 ---
 
@@ -112,18 +115,22 @@ Removed `cliPath` from data.json so auto-detection kicks in:
 ### Modified
 - `src/core/llm/claudeCode.ts` - Added auto-detection + env var expansion + multi-path retry
 
-### Commits
+### Commits (All Pushed)
 ```
 110f6f3 Add auto-detection for Claude Code CLI path
 56cb529 Fix Claude Code CLI execution on Windows
 38a699e Add session documentation and work reconciliation notes
 eaebf6d Add multi-path retry for Claude Code CLI detection
+ed80546 Update documentation with multi-path retry details
+5512a14 Add comprehensive work merge master reference
+d8404ad Add breadcrumb trail of all files touched in home session
+6c02db6 Rename fork to Power Composer
 ```
 
 ### Pushed
 ```
 To https://github.com/HomeHeartTherapy/obsidian-smart-composer.git
-   4a7b628..eaebf6d  main -> main
+   4a7b628..6c02db6  main -> main
 ```
 
 ---
@@ -224,6 +231,28 @@ If ALL paths fail, you'll need to add your work-specific path to `buildPossibleP
 |------|--------|
 | Original problem | CLI path not expanding env vars |
 | Home fix | Auto-detection + env var expansion + multi-path retry |
-| Committed | Yes (eaebf6d) |
+| Plugin rename | Smart Composer → **Power Composer** |
+| Committed | Yes (6c02db6) |
 | Pushed | Yes |
 | Work reconciliation | PENDING - v14 migration needs recovery |
+
+---
+
+## Plugin Rename Details
+
+The fork was renamed to **Power Composer** to prevent Obsidian from auto-updating and overwriting customizations.
+
+| Field | Old Value | New Value |
+|-------|-----------|-----------|
+| Plugin ID | `smart-composer` | `power-composer` |
+| Plugin Name | `Smart Composer` | `Power Composer` |
+| Author | `Heesu Suh` | `Home Heart, LLC` |
+| License | MIT | Proprietary (UNLICENSED) |
+
+**Files Updated:**
+- `manifest.json`
+- `package.json`
+- `TODO.md` (created)
+
+**Future Feature (in TODO.md):**
+- Agentic Mode switch - toggle between Chat Mode (current) and Agentic Mode (Claude Code style multi-step task execution)

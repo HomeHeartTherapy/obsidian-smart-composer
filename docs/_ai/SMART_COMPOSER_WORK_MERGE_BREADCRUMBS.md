@@ -1,7 +1,10 @@
-# Smart Composer Work Merge - Breadcrumb Trail
+# Power Composer Work Merge - Breadcrumb Trail
 
 **Session Date**: 2025-12-22 (Home Machine)
 **Purpose**: Track every file touched and what was done
+**Fork Name**: **Power Composer** (renamed from Smart Composer)
+**Owner**: Home Heart, LLC
+**Contact**: StuartRyan@homehearttherapy.com
 
 ---
 
@@ -27,14 +30,25 @@
 
 ---
 
-### Documentation Created
+### Identity Files (Rename)
+
+| File | Action | Details |
+|------|--------|---------|
+| `manifest.json` | **MODIFIED** | id→power-composer, name→Power Composer, author→Home Heart, LLC |
+| `package.json` | **MODIFIED** | name→obsidian-power-composer, license→UNLICENSED, private→true |
+| `TODO.md` | **CREATED** | Full task list with Agentic Mode feature request |
+
+---
+
+### Documentation Created/Updated
 
 | File | Location | Purpose |
 |------|----------|---------|
 | `2025-12-22_HOME_SESSION.md` | `docs/_sessions/` | Full session log with problem/solution |
 | `WORK_RECONCILIATION_URGENT.md` | `docs/_ai/` | Instructions for Claude at work |
-| `SMART_COMPOSER_WORK_MERGE_MASTER.md` | `docs/_ai/` | Comprehensive merge reference |
+| `SMART_COMPOSER_WORK_MERGE_MASTER.md` | `docs/_ai/` | Comprehensive merge reference (now Power Composer) |
 | `SMART_COMPOSER_WORK_MERGE_BREADCRUMBS.md` | `docs/_ai/` | This file - breadcrumb trail |
+| `TODO.md` | root | Development task list |
 
 ---
 
@@ -72,6 +86,8 @@
 | `eaebf6d` | Add multi-path retry for Claude Code CLI detection | claudeCode.ts |
 | `ed80546` | Update documentation with multi-path retry details | docs/_sessions/, docs/_ai/ |
 | `5512a14` | Add comprehensive work merge master reference | docs/_ai/ |
+| `d8404ad` | Add breadcrumb trail of all files touched | docs/_ai/ |
+| `6c02db6` | **Rename fork to Power Composer** | manifest.json, package.json, TODO.md, docs/_ai/ |
 
 ---
 
@@ -97,6 +113,16 @@
 
 ### 5512a14 - Master Reference
 - Created comprehensive merge guide with work context
+
+### d8404ad - Breadcrumbs
+- Created this file - complete audit trail
+
+### 6c02db6 - Plugin Rename (CRITICAL)
+- Renamed plugin from Smart Composer to **Power Composer**
+- Changed manifest.json: id, name, author, isDesktopOnly
+- Changed package.json: name, author, license, private
+- Created TODO.md with Agentic Mode feature request
+- Why: Prevent Obsidian from auto-updating and destroying customizations
 
 ---
 
@@ -137,7 +163,7 @@ Cover all common npm configurations:
 ```
 User sends message
     ↓
-Smart Composer formats prompt
+Power Composer formats prompt
     ↓
 ClaudeCodeProvider.streamResponse()
     ↓
@@ -204,7 +230,10 @@ git reset --hard 4a7b628  # Before any home changes
 | | Created session documentation |
 | | Added multi-path retry for work compatibility |
 | | Created master reference and breadcrumbs |
-| Session End | All pushed, mirrors created at c:\claude\ |
+| | **RENAMED plugin to Power Composer** |
+| | Updated manifest.json, package.json |
+| | Created TODO.md with Agentic Mode feature |
+| Session End | All pushed, mirrors at c:\claude\ updated |
 
 ---
 
@@ -227,4 +256,6 @@ claude --version
 
 ---
 
-This breadcrumb trail is complete. Use `SMART_COMPOSER_WORK_MERGE_MASTER.md` for the action plan.
+This breadcrumb trail is complete. Use `POWER_COMPOSER_WORK_MERGE_MASTER.md` (or `SMART_COMPOSER_WORK_MERGE_MASTER.md` in repo) for the action plan.
+
+**Remember: This is now Power Composer, not Smart Composer!**
