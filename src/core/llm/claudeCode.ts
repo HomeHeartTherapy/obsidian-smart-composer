@@ -1,5 +1,4 @@
-import { execSync, spawn } from 'child_process'
-import * as fs from 'fs'
+import { spawn } from 'child_process'
 import * as path from 'path'
 import { Platform } from 'obsidian'
 
@@ -66,7 +65,7 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
 
   /**
    * Get the CLI path, auto-detecting if not explicitly configured.
-   * Checks multiple common installation locations.
+   * Uses a simple approach that works reliably in Electron.
    */
   private getCliPath(): string {
     // Return cached path if already resolved
@@ -78,63 +77,31 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
     const configuredPath = this.provider.additionalSettings?.cliPath
     if (configuredPath && configuredPath.trim() !== '') {
       this.cachedCliPath = this.expandEnvVars(configuredPath)
+      console.log(`[Claude Code] Using configured path: ${this.cachedCliPath}`)
       return this.cachedCliPath
     }
 
-    // Auto-detect: Check common installation locations
+    // Auto-detect: Build the most likely path based on platform
     const userProfile = process.env.USERPROFILE || process.env.HOME || ''
-    const possiblePaths = [
-      // Standard npm global (Windows)
-      path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
-      path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude'),
-      // User-local npm prefix (for non-admin installs)
-      path.join(userProfile, 'npm', 'claude.cmd'),
-      path.join(userProfile, 'npm', 'claude'),
-      path.join(userProfile, 'node_modules', '.bin', 'claude.cmd'),
-      path.join(userProfile, 'node_modules', '.bin', 'claude'),
-      // Direct in user profile (custom npm prefix)
-      path.join(userProfile, 'claude.cmd'),
-      path.join(userProfile, 'bin', 'claude.cmd'),
-      path.join(userProfile, 'bin', 'claude'),
-      // nvm-windows locations
-      path.join(userProfile, 'AppData', 'Roaming', 'nvm', 'current', 'claude.cmd'),
-      // macOS/Linux standard locations
-      '/usr/local/bin/claude',
-      '/usr/bin/claude',
-      path.join(userProfile, '.npm-global', 'bin', 'claude'),
-    ]
 
-    // Check each path
-    for (const tryPath of possiblePaths) {
-      try {
-        if (fs.existsSync(tryPath)) {
-          console.log(`[Claude Code] Auto-detected CLI at: ${tryPath}`)
-          this.cachedCliPath = tryPath
-          return this.cachedCliPath
-        }
-      } catch {
-        // Ignore access errors, continue checking
-      }
+    if (process.platform === 'win32') {
+      // On Windows, the standard npm global path
+      const npmPath = path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd')
+      console.log(`[Claude Code] Using Windows npm path: ${npmPath}`)
+      this.cachedCliPath = npmPath
+      return this.cachedCliPath
+    } else {
+      // On Unix, check common locations
+      const unixPaths = [
+        '/usr/local/bin/claude',
+        '/usr/bin/claude',
+        path.join(userProfile, '.npm-global', 'bin', 'claude'),
+      ]
+      // Just use the first one - it's the most common
+      this.cachedCliPath = unixPaths[0]
+      console.log(`[Claude Code] Using Unix path: ${this.cachedCliPath}`)
+      return this.cachedCliPath
     }
-
-    // Last resort: try 'where' command on Windows or 'which' on Unix
-    try {
-      const cmd = process.platform === 'win32' ? 'where claude' : 'which claude'
-      const result = execSync(cmd, { encoding: 'utf8', timeout: 5000 }).trim()
-      if (result) {
-        const firstPath = result.split('\n')[0].trim()
-        console.log(`[Claude Code] Found CLI via system PATH: ${firstPath}`)
-        this.cachedCliPath = firstPath
-        return this.cachedCliPath
-      }
-    } catch {
-      // where/which failed, fall back to default
-    }
-
-    // Fall back to hoping 'claude' is in PATH
-    console.log('[Claude Code] Using default "claude" - hoping it\'s in PATH')
-    this.cachedCliPath = ClaudeCodeProvider.DEFAULT_CLI_PATH
-    return this.cachedCliPath
   }
 
   /**
@@ -203,31 +170,41 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       const cliPath = this.getCliPath()
+      // Don't pass prompt as arg - Windows has ~8191 char limit
+      // Instead, we'll pipe it via stdin
       const args = [
         '-p', // print mode (non-interactive)
         '--output-format',
         'text',
         '--model',
         modelName,
-        prompt,
+        '-', // Read prompt from stdin
       ]
 
       // Get shell environment for proper PATH resolution
       const shellEnv = this.getShellEnv()
 
       const child = spawn(cliPath, args, {
-        // Critical: Use 'inherit' for stdin to avoid Node.js hanging issue
-        // See: https://github.com/anthropics/claude-code/issues/771
-        stdio: ['inherit', 'pipe', 'pipe'],
+        // Use 'pipe' for stdin so we can write the prompt
+        stdio: ['pipe', 'pipe', 'pipe'],
         env: {
           ...shellEnv,
           // Critical: Set ANTHROPIC_API_KEY to empty string
           // Without this, Node.js spawn hangs indefinitely
           ANTHROPIC_API_KEY: '',
         },
+        // Critical for Windows: shell:true required to run .cmd files
+        // Without this, spawn throws EINVAL on Windows
+        shell: process.platform === 'win32',
         // Don't create a console window on Windows
         windowsHide: true,
       })
+
+      // Write prompt to stdin and close it
+      if (child.stdin) {
+        child.stdin.write(prompt)
+        child.stdin.end()
+      }
 
       let stdout = ''
       let stderr = ''
