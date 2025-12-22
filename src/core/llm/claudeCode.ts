@@ -1,4 +1,6 @@
-import { spawn } from 'child_process'
+import { execSync, spawn } from 'child_process'
+import * as fs from 'fs'
+import * as path from 'path'
 import { Platform } from 'obsidian'
 
 import { ChatModel } from '../../types/chat-model.types'
@@ -48,11 +50,91 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
     }
   }
 
+  /**
+   * Cached CLI path after auto-detection
+   */
+  private cachedCliPath: string | null = null
+
+  /**
+   * Expand Windows environment variables like %USERPROFILE%
+   */
+  private expandEnvVars(str: string): string {
+    return str.replace(/%([^%]+)%/g, (_, varName) => {
+      return process.env[varName] || `%${varName}%`
+    })
+  }
+
+  /**
+   * Get the CLI path, auto-detecting if not explicitly configured.
+   * Checks multiple common installation locations.
+   */
   private getCliPath(): string {
-    return (
-      this.provider.additionalSettings?.cliPath ||
-      ClaudeCodeProvider.DEFAULT_CLI_PATH
-    )
+    // Return cached path if already resolved
+    if (this.cachedCliPath) {
+      return this.cachedCliPath
+    }
+
+    // If user explicitly set a path, use it (with env var expansion)
+    const configuredPath = this.provider.additionalSettings?.cliPath
+    if (configuredPath && configuredPath.trim() !== '') {
+      this.cachedCliPath = this.expandEnvVars(configuredPath)
+      return this.cachedCliPath
+    }
+
+    // Auto-detect: Check common installation locations
+    const userProfile = process.env.USERPROFILE || process.env.HOME || ''
+    const possiblePaths = [
+      // Standard npm global (Windows)
+      path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
+      path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude'),
+      // User-local npm prefix (for non-admin installs)
+      path.join(userProfile, 'npm', 'claude.cmd'),
+      path.join(userProfile, 'npm', 'claude'),
+      path.join(userProfile, 'node_modules', '.bin', 'claude.cmd'),
+      path.join(userProfile, 'node_modules', '.bin', 'claude'),
+      // Direct in user profile (custom npm prefix)
+      path.join(userProfile, 'claude.cmd'),
+      path.join(userProfile, 'bin', 'claude.cmd'),
+      path.join(userProfile, 'bin', 'claude'),
+      // nvm-windows locations
+      path.join(userProfile, 'AppData', 'Roaming', 'nvm', 'current', 'claude.cmd'),
+      // macOS/Linux standard locations
+      '/usr/local/bin/claude',
+      '/usr/bin/claude',
+      path.join(userProfile, '.npm-global', 'bin', 'claude'),
+    ]
+
+    // Check each path
+    for (const tryPath of possiblePaths) {
+      try {
+        if (fs.existsSync(tryPath)) {
+          console.log(`[Claude Code] Auto-detected CLI at: ${tryPath}`)
+          this.cachedCliPath = tryPath
+          return this.cachedCliPath
+        }
+      } catch {
+        // Ignore access errors, continue checking
+      }
+    }
+
+    // Last resort: try 'where' command on Windows or 'which' on Unix
+    try {
+      const cmd = process.platform === 'win32' ? 'where claude' : 'which claude'
+      const result = execSync(cmd, { encoding: 'utf8', timeout: 5000 }).trim()
+      if (result) {
+        const firstPath = result.split('\n')[0].trim()
+        console.log(`[Claude Code] Found CLI via system PATH: ${firstPath}`)
+        this.cachedCliPath = firstPath
+        return this.cachedCliPath
+      }
+    } catch {
+      // where/which failed, fall back to default
+    }
+
+    // Fall back to hoping 'claude' is in PATH
+    console.log('[Claude Code] Using default "claude" - hoping it\'s in PATH')
+    this.cachedCliPath = ClaudeCodeProvider.DEFAULT_CLI_PATH
+    return this.cachedCliPath
   }
 
   /**
