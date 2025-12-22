@@ -29,12 +29,20 @@ private getCliPath(): string {
 
 ### Our Fix
 ```typescript
-// NEW CODE - works
-private getCliPath(): string {
-  // Auto-detects from 12+ common paths
-  // Falls back to 'where claude' command
-  // Expands %ENV_VARS% if path is configured
+// NEW CODE - works with multi-path retry
+private buildPossiblePaths(): string[] {
+  return [
+    path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
+    path.join(userProfile, 'npm', 'claude.cmd'),
+    path.join(userProfile, '.npm-global', 'claude.cmd'),
+    path.join(userProfile, 'AppData', 'Local', 'npm', 'claude.cmd'),
+    path.join(userProfile, 'claude.cmd'),
+    path.join(userProfile, 'bin', 'claude.cmd'),
+    'claude',  // PATH fallback
+  ]
 }
+// On ENOENT, automatically tries next path
+// Caches working path on first success
 ```
 
 ---
@@ -59,7 +67,7 @@ src/settings/schema/migrations/index.ts        # Should have VERSION = 14
 ### What to Do
 1. **DO NOT PULL** until you've saved your local changes
 2. Commit or stash any unpushed work changes
-3. Pull the home changes (110f6f3)
+3. Pull the home changes (latest: eaebf6d)
 4. Merge/restore the v14 migration
 5. Rebuild and test
 6. PUSH EVERYTHING
@@ -84,9 +92,12 @@ import * as path from 'path'
 - Caches result for performance
 - Expands Windows `%ENV_VARS%`
 
-### Commit
+### Commits
 ```
 110f6f3 Add auto-detection for Claude Code CLI path
+56cb529 Fix Claude Code CLI execution on Windows
+38a699e Add session documentation and work reconciliation notes
+eaebf6d Add multi-path retry for Claude Code CLI detection
 ```
 
 ---
@@ -107,16 +118,19 @@ The auto-detection handles both configurations.
 
 Open Obsidian dev console (Ctrl+Shift+I) and look for:
 ```
-[Claude Code] Auto-detected CLI at: C:\Users\stuart.ryan\...
+[Claude Code] Trying path [1/7]: C:\Users\stuart.ryan\AppData\Roaming\npm\claude.cmd
+[Claude Code] Path failed, trying next...
+[Claude Code] Trying path [2/7]: C:\Users\stuart.ryan\npm\claude.cmd
+[Claude Code] Caching working path: C:\Users\stuart.ryan\npm\claude.cmd
 ```
 
-If it fails, check:
+The multi-path retry will automatically try all 7 paths. If ALL fail, check:
 ```cmd
 where claude
 npm config get prefix
 ```
 
-Add the work path to `possiblePaths` in `claudeCode.ts` if needed.
+Add the work path to `buildPossiblePaths()` in `claudeCode.ts` if needed.
 
 ---
 
@@ -167,10 +181,10 @@ The changes should be in different parts of the codebase, so conflicts should be
 ## Success Criteria
 
 After reconciliation:
-1. `git log` shows both home (110f6f3) and work commits
+1. `git log` shows both home (eaebf6d) and work commits
 2. `SETTINGS_SCHEMA_VERSION = 14` in migrations/index.ts
 3. `13_to_14.ts` exists
-4. `claudeCode.ts` has auto-detection code
+4. `claudeCode.ts` has multi-path retry auto-detection code
 5. Plugin works on both machines
 6. Everything is pushed to GitHub
 

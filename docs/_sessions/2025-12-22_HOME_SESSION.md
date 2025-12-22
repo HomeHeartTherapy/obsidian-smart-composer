@@ -110,17 +110,20 @@ Removed `cliPath` from data.json so auto-detection kicks in:
 ## Files Changed
 
 ### Modified
-- `src/core/llm/claudeCode.ts` - Added auto-detection + env var expansion
+- `src/core/llm/claudeCode.ts` - Added auto-detection + env var expansion + multi-path retry
 
-### Commit
+### Commits
 ```
 110f6f3 Add auto-detection for Claude Code CLI path
+56cb529 Fix Claude Code CLI execution on Windows
+38a699e Add session documentation and work reconciliation notes
+eaebf6d Add multi-path retry for Claude Code CLI detection
 ```
 
 ### Pushed
 ```
 To https://github.com/HomeHeartTherapy/obsidian-smart-composer.git
-   4a7b628..110f6f3  main -> main
+   4a7b628..eaebf6d  main -> main
 ```
 
 ---
@@ -196,10 +199,22 @@ By checking multiple known paths AND falling back to `where claude`, we handle:
 
 When testing at work, open Obsidian's dev console (Ctrl+Shift+I) and look for:
 ```
-[Claude Code] Auto-detected CLI at: C:\Users\stuart.ryan\...
+[Claude Code] Trying path [1/7]: C:\Users\stuart.ryan\AppData\Roaming\npm\claude.cmd
+[Claude Code] Path failed, trying next...
+[Claude Code] Trying path [2/7]: C:\Users\stuart.ryan\npm\claude.cmd
+[Claude Code] Caching working path: C:\Users\stuart.ryan\npm\claude.cmd
 ```
 
-If it says "Using default 'claude' - hoping it's in PATH", the auto-detection didn't find it and you may need to add the work path to the `possiblePaths` array.
+The multi-path retry system will automatically try all 7 paths:
+1. `AppData\Roaming\npm\claude.cmd` (standard npm global)
+2. `npm\claude.cmd` (custom prefix)
+3. `.npm-global\claude.cmd` (another common prefix)
+4. `AppData\Local\npm\claude.cmd` (local install)
+5. `claude.cmd` (direct in profile)
+6. `bin\claude.cmd` (bin folder)
+7. `claude` (PATH fallback)
+
+If ALL paths fail, you'll need to add your work-specific path to `buildPossiblePaths()` in `claudeCode.ts`.
 
 ---
 
@@ -208,7 +223,7 @@ If it says "Using default 'claude' - hoping it's in PATH", the auto-detection di
 | What | Status |
 |------|--------|
 | Original problem | CLI path not expanding env vars |
-| Home fix | Auto-detection + env var expansion |
-| Committed | Yes (110f6f3) |
+| Home fix | Auto-detection + env var expansion + multi-path retry |
+| Committed | Yes (eaebf6d) |
 | Pushed | Yes |
 | Work reconciliation | PENDING - v14 migration needs recovery |
