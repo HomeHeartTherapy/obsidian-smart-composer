@@ -7,6 +7,27 @@
 
 ---
 
+## IMPORTANT: Plugin Has Been Renamed!
+
+**The fork is now called "Power Composer"** (not Smart Composer).
+
+| Field | Old Value | New Value |
+|-------|-----------|-----------|
+| Plugin ID | `smart-composer` | `power-composer` |
+| Plugin Name | `Smart Composer` | `Power Composer` |
+| Author | `Heesu Suh` | `Home Heart, LLC` |
+| Contact | - | `StuartRyan@homehearttherapy.com` |
+| License | MIT | Proprietary (UNLICENSED) |
+
+**Why?** To prevent Obsidian from auto-updating and overwriting our customizations.
+
+**Files already updated:**
+- `manifest.json` - New identity
+- `package.json` - New identity
+- `TODO.md` - Full task list created
+
+---
+
 ## TL;DR
 
 The user forgot to push code from work on Dec 19. The work machine has a **v14 settings migration** that doesn't exist in this repo. Today (Dec 22) at home, we fixed a different bug (CLI path auto-detection). You need to merge these changes.

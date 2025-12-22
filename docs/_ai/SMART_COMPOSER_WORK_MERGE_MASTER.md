@@ -1,8 +1,26 @@
-# Smart Composer Work Merge - Master Reference
+# Power Composer Work Merge - Master Reference
 
 **Created**: 2025-12-22 (Home Session)
 **For**: Claude at Work
 **Priority**: CRITICAL - Read before doing anything!
+
+---
+
+## PLUGIN RENAMED!
+
+**This fork is now "Power Composer"** (not Smart Composer).
+
+| Field | New Value |
+|-------|-----------|
+| Plugin ID | `power-composer` |
+| Plugin Name | `Power Composer` |
+| Author | `Home Heart, LLC` |
+| Contact | `StuartRyan@homehearttherapy.com` |
+| License | Proprietary (UNLICENSED) |
+
+**Why?** Prevents Obsidian from auto-updating and destroying customizations.
+
+**See**: `TODO.md` for full task list including future Agentic Mode feature.
 
 ---
 
@@ -14,7 +32,7 @@
 | **Root Cause** | `%USERPROFILE%` not expanded, paths not auto-detected |
 | **Solution** | Multi-path retry system (7 paths) |
 | **Work has unpushed** | v14 settings migration |
-| **Home pushed** | Multi-path CLI detection |
+| **Home pushed** | Multi-path CLI detection + rename to Power Composer |
 | **Action Required** | Merge both, rebuild, push |
 
 ---
@@ -120,10 +138,15 @@ npm run build
 
 Copy `main.js` to plugin folder:
 ```bash
+# NOTE: Folder may still be named smart-composer until you rename it
 copy main.js "C:\path\to\vault\.obsidian\plugins\smart-composer\"
+# After renaming folder:
+copy main.js "C:\path\to\vault\.obsidian\plugins\power-composer\"
 ```
 
 Restart Obsidian, test Claude Code provider.
+
+**Note**: You may need to rename the plugin folder from `smart-composer` to `power-composer` and update Obsidian's community-plugins.json.
 
 ### Step 5: Push Everything
 ```bash
