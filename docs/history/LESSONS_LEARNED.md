@@ -257,4 +257,96 @@ When context was lost:
 
 ---
 
+## Lessons from 2025-12-22 Evening Session
+
+### 6. Forked Plugins Need Independent Databases
+
+**What Happened**: Power Composer (forked from Smart Composer) initially shared the same database paths. When both were enabled, Power Composer failed to load with "Failed to load plugin" error.
+
+**Root Cause**: Both plugins tried to lock `.smtcmp_vector_db.tar.gz` simultaneously. First one wins, second crashes.
+
+**Fix**:
+```typescript
+// OLD (shared)
+export const PGLITE_DB_PATH = '.smtcmp_vector_db.tar.gz'
+export const ROOT_DIR = '.smtcmp_json_db'
+
+// NEW (independent)
+export const PGLITE_DB_PATH = '.pwrcmp_vector_db.tar.gz'
+export const ROOT_DIR = '.pwrcmp_json_db'
+```
+
+**Lesson**: When forking a plugin, change ALL identifiers: database paths, view types, command IDs.
+
+---
+
+### 7. Copy Data, Don't Move It
+
+**What Happened**: When separating databases, we copied existing data to new locations rather than moving it.
+
+**Why This Was Right**:
+- User keeps their Smart Composer data intact
+- Power Composer starts with full history
+- No data loss risk
+- Can delete old data later if desired
+
+**Pattern**:
+```bash
+# COPY, don't move
+cp -r .smtcmp_json_db .pwrcmp_json_db
+cp .smtcmp_vector_db.tar.gz .pwrcmp_vector_db.tar.gz
+```
+
+---
+
+### 8. Test the Actual Plugin, Not Just the Code
+
+**What Happened**: Build succeeded, code looked correct, but plugin failed to load in Obsidian due to database conflict that only manifests at runtime.
+
+**Lesson**: Always test in the actual Obsidian environment. Build success ≠ plugin works.
+
+**Testing Checklist**:
+1. ✅ Build succeeds (`npm run build`)
+2. ✅ Deploy to Obsidian vault
+3. ✅ Plugin enables without error
+4. ✅ Console shows correct initialization
+5. ✅ Core functionality works (Claude Code tested)
+
+---
+
+### 9. Claude Code Provider: Tested & Working
+
+**Verified 2025-12-22**:
+- ✅ Multi-path CLI detection finds `claude.exe` at work
+- ✅ Haiku 4.5 with low thinking works
+- ✅ Opus 4.5 with ultrathink works
+- ✅ No API key needed (uses Max/Pro subscription)
+
+**Expected at Home**:
+- Path #2 (`AppData\Roaming\npm\claude.cmd`) should be found
+- Same models should work
+
+**If It Fails at Home**:
+```bash
+where claude
+# Add output to buildPossiblePaths() in claudeCode.ts
+```
+
+---
+
+## Critical Discovery: The "fs" Error is Harmless
+
+**The Error**:
+```
+Failed to fetch extension: vector TypeError: Failed to resolve module specifier 'fs'
+```
+
+**What It Means**: PGlite trying to load vector extension has a cosmetic error.
+
+**Impact**: NONE. Database still initializes. Plugin works fine.
+
+**Action**: Ignore it. It's noise from the PGlite library.
+
+---
+
 *Add new lessons as they're learned. This document grows with experience.*

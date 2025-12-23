@@ -169,10 +169,40 @@ For the Claude CLI to be found on BOTH machines, the code must check these paths
 
 ---
 
+## Database Independence
+
+*Implemented: 2025-12-22 Evening*
+
+| Plugin | JSON Database | Vector Database | Status |
+|--------|---------------|-----------------|--------|
+| Smart Composer | `.smtcmp_json_db/` | `.smtcmp_vector_db.tar.gz` | Disabled |
+| Power Composer | `.pwrcmp_json_db/` | `.pwrcmp_vector_db.tar.gz` | ✅ Active |
+
+View type IDs also separated:
+- Smart Composer: `smtcmp-chat-view`, `smtcmp-apply-view`
+- Power Composer: `pwrcmp-chat-view`, `pwrcmp-apply-view`
+
+---
+
+## Live Testing Results
+
+*Tested: 2025-12-22 Evening @ Work*
+
+| Test | Model | Thinking | Result |
+|------|-------|----------|--------|
+| Claude Code CLI | claude-code/haiku-4.5 | low | ✅ **WORKS** |
+| Claude Code CLI | claude-code/opus-4.5 | ultrathink (max) | ✅ **WORKS** |
+| API Pipeline | Not tested | N/A | 🔴 Groq missing from UI |
+
+**Key confirmation**: Claude Code provider uses Max/Pro subscription via CLI - no API key needed.
+
+---
+
 ## Update History
 
 | Date | Location | What Was Verified |
 |------|----------|-------------------|
+| 2025-12-22 Evening | Work | Claude Code WORKING, database independence |
 | 2025-12-22 Evening | Work | All work machine facts |
 | 2025-12-22 Morning | Home | Home CLI location, env var issue |
 

@@ -25,6 +25,10 @@ This document captures the significant architectural decisions made for the Obsi
 13. [ADR-013: Schema Validation - Zod](#adr-013-schema-validation---zod)
 14. [ADR-014: Diff Algorithm - vscode-diff](#adr-014-diff-algorithm---vscode-diff)
 15. [ADR-015: Fuzzy Search - fuzzysort](#adr-015-fuzzy-search---fuzzysort)
+16. [ADR-016: Console Debug Logging](#adr-016-console-debug-logging-for-model-verification)
+17. [ADR-017: Extended Thinking Variants](#adr-017-extended-thinking-variants-for-anthropic-api)
+18. [ADR-018: Two-Row UI Layout](#adr-018-two-row-ui-layout-for-chat-input)
+19. [ADR-019: Database Independence](#adr-019-database-independence-power-composer-vs-smart-composer)
 
 ---
 
@@ -1389,6 +1393,7 @@ const results = fuzzysort.go(query, templates, { key: 'name', threshold: 0.2 })
 | 016 | Console Debug Logging | Human-readable model verification |
 | 017 | Extended Thinking Variants | Budget-based thinking for Anthropic API |
 | 018 | Two-Row UI Layout | VS Code Copilot-style dropdown controls |
+| 019 | Database Independence | Separate `.pwrcmp_*` paths from Smart Composer |
 
 ---
 
@@ -1652,6 +1657,94 @@ const THINKING_OPTIONS: Record<string, ThinkingOption[]> = {
 - **Positive**: Easy to switch API/Subscription for same model family
 - **Negative**: More UI components to maintain
 - **Negative**: Need to keep provider groupings updated as new providers added
+
+---
+
+---
+
+## ADR-019: Database Independence (Power Composer vs Smart Composer)
+
+### Status
+**Accepted**
+
+### Context
+Power Composer was forked from Smart Composer. Initially, both plugins shared the same database paths:
+- `.smtcmp_json_db/` (chats, templates)
+- `.smtcmp_vector_db.tar.gz` (vector embeddings)
+- View types: `smtcmp-chat-view`, `smtcmp-apply-view`
+
+When users attempted to run both plugins simultaneously, or when Smart Composer was enabled while loading Power Composer, a **fatal conflict** occurred:
+- Error: "Failed to load plugin 'power-composer'"
+- Root cause: Both plugins tried to access the same database file
+- The first plugin to load locked the database, preventing the second from initializing
+
+### Decision
+Give Power Composer **completely independent database paths and identifiers**:
+
+| Resource | Smart Composer | Power Composer |
+|----------|---------------|----------------|
+| JSON Database | `.smtcmp_json_db/` | `.pwrcmp_json_db/` |
+| Vector Database | `.smtcmp_vector_db.tar.gz` | `.pwrcmp_vector_db.tar.gz` |
+| Chat View Type | `smtcmp-chat-view` | `pwrcmp-chat-view` |
+| Apply View Type | `smtcmp-apply-view` | `pwrcmp-apply-view` |
+
+Files changed:
+- `src/constants.ts` - View types and vector DB path
+- `src/database/json/constants.ts` - JSON DB root directory
+- `src/database/DatabaseManager.ts` - Log message branding
+
+### Rationale
+Database independence was chosen because:
+1. **No locking conflicts** - Each plugin owns its database exclusively
+2. **Isolation** - Corruption in one doesn't affect the other
+3. **Clean uninstall** - Removing one plugin doesn't break the other's data
+4. **Independent evolution** - Schema changes don't require coordination
+5. **Concurrent operation** - Theoretically possible (untested)
+
+### Alternatives Considered
+
+#### Shared Database with Locking
+**Why NOT chosen:**
+- Complex lock management
+- One plugin would block the other
+- Defeats purpose of having two plugins
+- Race conditions during startup
+
+#### Database Migration on Fork
+**Why NOT chosen:**
+- Would require deleting Smart Composer data
+- Users might want to keep both
+- More complex migration path
+- Data loss risk
+
+#### Different Plugin IDs Only
+**Why NOT chosen:**
+- Doesn't solve database locking
+- View types could still conflict
+- Partial solution is no solution
+
+### Implementation Notes
+Existing data was **copied** (not moved) to new locations:
+```bash
+cp -r .smtcmp_json_db .pwrcmp_json_db
+cp .smtcmp_vector_db.tar.gz .pwrcmp_vector_db.tar.gz
+```
+
+This preserves user's chat history and templates while creating independence.
+
+### Consequences
+- **Positive**: Plugins can coexist without conflicts
+- **Positive**: Clear branding separation
+- **Positive**: User data preserved in both locations
+- **Negative**: Duplicate data storage (temporary, until user deletes old)
+- **Negative**: Future Smart Composer updates won't sync to Power Composer
+
+### Verification
+Tested 2025-12-22 at Work:
+- ✅ Power Composer loads with Smart Composer disabled
+- ✅ Database initializes with `.pwrcmp_*` paths
+- ✅ Console shows "Power Composer database initialized"
+- 🟡 Concurrent operation untested (low priority)
 
 ---
 

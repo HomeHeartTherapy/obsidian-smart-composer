@@ -2,10 +2,10 @@ import { ChatModel } from './types/chat-model.types'
 import { EmbeddingModel } from './types/embedding-model.types'
 import { LLMProvider, LLMProviderType } from './types/provider.types'
 
-export const CHAT_VIEW_TYPE = 'smtcmp-chat-view'
-export const APPLY_VIEW_TYPE = 'smtcmp-apply-view'
+export const CHAT_VIEW_TYPE = 'pwrcmp-chat-view'
+export const APPLY_VIEW_TYPE = 'pwrcmp-apply-view'
 
-export const PGLITE_DB_PATH = '.smtcmp_vector_db.tar.gz'
+export const PGLITE_DB_PATH = '.pwrcmp_vector_db.tar.gz'
 
 // Default model ids
 export const DEFAULT_CHAT_MODEL_ID = 'claude-sonnet-4.5'
