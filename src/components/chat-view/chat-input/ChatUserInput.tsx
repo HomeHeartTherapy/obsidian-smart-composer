@@ -25,13 +25,16 @@ import { fileToMentionableImage } from '../../../utils/llm/image'
 import { openMarkdownFile, readTFileContent } from '../../../utils/obsidian'
 import { ObsidianMarkdown } from '../ObsidianMarkdown'
 
+import { ConnectionTypeSelect } from './ConnectionTypeSelect'
 import { ImageUploadButton } from './ImageUploadButton'
 import LexicalContentEditable from './LexicalContentEditable'
 import MentionableBadge from './MentionableBadge'
 import { ModelSelect } from './ModelSelect'
 import { MentionNode } from './plugins/mention/MentionNode'
 import { NodeMutations } from './plugins/on-mutation/OnMutationPlugin'
+import { ProviderSelect } from './ProviderSelect'
 import { SubmitButton } from './SubmitButton'
+import { ThinkingSelect } from './ThinkingSelect'
 import ToolBadge from './ToolBadge'
 import { VaultChatButton } from './VaultChatButton'
 
@@ -271,18 +274,30 @@ const ChatUserInput = forwardRef<ChatUserInputRef, ChatUserInputProps>(
           }}
         />
 
+        {/* Two-row control bar */}
         <div className="smtcmp-chat-user-input-controls">
-          <div className="smtcmp-chat-user-input-controls__model-select-container">
-            <ModelSelect />
+          {/* Row 1: Provider + Connection Type (left-aligned) */}
+          <div className="smtcmp-chat-user-input-controls__row smtcmp-chat-user-input-controls__row--1">
+            <div className="smtcmp-chat-user-input-controls__provider-group">
+              <ProviderSelect />
+              <ConnectionTypeSelect />
+            </div>
           </div>
-          <div className="smtcmp-chat-user-input-controls__buttons">
-            <ImageUploadButton onUpload={handleUploadImages} />
-            <SubmitButton onClick={() => handleSubmit()} />
-            <VaultChatButton
-              onClick={() => {
-                handleSubmit({ useVaultSearch: true })
-              }}
-            />
+          {/* Row 2: Model + Thinking + Action Buttons */}
+          <div className="smtcmp-chat-user-input-controls__row smtcmp-chat-user-input-controls__row--2">
+            <div className="smtcmp-chat-user-input-controls__model-group">
+              <ModelSelect />
+              <ThinkingSelect />
+            </div>
+            <div className="smtcmp-chat-user-input-controls__buttons">
+              <ImageUploadButton onUpload={handleUploadImages} />
+              <SubmitButton onClick={() => handleSubmit()} />
+              <VaultChatButton
+                onClick={() => {
+                  handleSubmit({ useVaultSearch: true })
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

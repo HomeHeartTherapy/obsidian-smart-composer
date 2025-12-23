@@ -185,9 +185,10 @@ export class DatabaseManager {
     }
     try {
       const blob: Blob = await this.pgClient.dumpDataDir('gzip')
+      const buffer = Buffer.from(await blob.arrayBuffer())
       await this.app.vault.adapter.writeBinary(
         this.dbPath,
-        Buffer.from(await blob.arrayBuffer()),
+        buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer,
       )
     } catch (error) {
       console.error('Error saving database:', error)

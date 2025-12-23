@@ -130,7 +130,9 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
 
     if (process.platform === 'win32') {
       return [
-        // Standard npm global (with admin)
+        // Standalone installer location (WORK machine - verified 2025-12-22)
+        path.join(userProfile, '.local', 'bin', 'claude.exe'),
+        // Standard npm global (with admin) - HOME machine
         path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
         // Common non-admin npm prefix locations
         path.join(userProfile, 'npm', 'claude.cmd'),
