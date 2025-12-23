@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Projects\\\\power-composer\" log --oneline -10)",
+      "Bash(git -C \"C:\\\\Projects\\\\power-composer\" remote add:*)",
+      "Bash(git -C \"C:\\\\Projects\\\\power-composer\" push power-composer --all)",
+      "Bash(git -C \"C:\\\\Projects\\\\power-composer\" push power-composer --tags)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFreeze Friday 2025-12-19 state: v14 migration + two-row UI\n\nThis commit preserves the complete working state from Friday evening:\n- v14 settings migration \\(13_to_14.ts\\)\n- Two-row UI changes \\(ChatUserInput.tsx, styles.css\\)\n- Connection type, provider, and thinking selectors\n- All documentation and session logs\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(cmd /c \"del \\\\?\\\\C:\\\\Projects\\\\obsidian-smart-composer-homeheart-UPGRADED\\\\nul\")",
+      "Bash(dir:*)",
+      "Bash(python -c \"import os; os.remove\\(''\\\\\\\\?\\\\C:\\\\Projects\\\\obsidian-smart-composer-homeheart-UPGRADED\\\\nul''\\)\")",
+      "Bash(ren nul nul.txt)",
+      "Bash(del:*)",
+      "Bash(git push:*)",
+      "Bash(npm config:*)",
+      "Bash(where:*)",
+      "Bash(claude:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd Power Composer master specification and culmination docs\n\n- POWER_COMPOSER_MASTER_SPEC.md: Single source of truth with verified facts,\n  environment specs, merge procedure, ADRs, lessons learned\n- POWER_COMPOSER_CULMINATION_2025-12-22.md: Detailed session narrative\n\nThese documents enable a stateless Claude to \"just type go\" and understand\nthe complete context, what''s verified vs assumed, and exactly how to proceed.\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git checkout:*)",
+      "Bash(ls:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)",
+      "Bash(findstr:*)",
+      "Bash(\"C:\\\\Users\\\\stuart.ryan\\\\.local\\\\bin\\\\claude.exe\" --version)"
+    ]
+  }
+}
