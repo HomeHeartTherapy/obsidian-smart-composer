@@ -29,6 +29,7 @@ This document captures the significant architectural decisions made for the Obsi
 17. [ADR-017: Extended Thinking Variants](#adr-017-extended-thinking-variants-for-anthropic-api)
 18. [ADR-018: Two-Row UI Layout](#adr-018-two-row-ui-layout-for-chat-input)
 19. [ADR-019: Database Independence](#adr-019-database-independence-power-composer-vs-smart-composer)
+20. [ADR-020: UI Selector Hierarchy](#adr-020-ui-selector-hierarchy)
 
 ---
 
@@ -1745,6 +1746,106 @@ Tested 2025-12-22 at Work:
 - ✅ Database initializes with `.pwrcmp_*` paths
 - ✅ Console shows "Power Composer database initialized"
 - 🟡 Concurrent operation untested (low priority)
+
+---
+
+---
+
+## ADR-020: UI Selector Hierarchy
+
+### Status
+**Accepted**
+
+### Context
+The chat input UI has four selection controls:
+1. **Provider** - Claude, ChatGPT, Gemini, etc.
+2. **Connection Type** - API vs Subscription
+3. **Model** - Specific model within provider
+4. **Thinking** - Thinking level (OFF, Low, Medium, High, Ultra)
+
+Originally, the Model dropdown showed ALL enabled models across ALL providers, creating confusion:
+- User selects "Claude" provider, but can still pick "gpt-5" from model dropdown
+- Thinking variants cluttered the list (opus-4.5, opus-4.5-think, opus-4.5-think-hard, opus-4.5-ultrathink)
+- 16+ Claude Code models when only 4 base models exist
+
+### Decision
+Implement a **top-down filtering hierarchy**:
+
+```
+Provider → Connection Type → Model → Thinking
+   ↓            ↓              ↓         ↓
+ filters    filters        selects   applies to
+ connection  model          base     selected
+ types       list           model    model
+```
+
+**Key changes:**
+1. Model dropdown only shows models matching current provider type
+2. Thinking variants are hidden from model dropdown
+3. Model dropdown shows base models only (e.g., `opus-4.5` not `opus-4.5-ultrathink`)
+4. Thinking dropdown switches to the appropriate variant model behind the scenes
+
+### Rationale
+1. **Intuitive hierarchy** - Users expect Provider to filter what's below it
+2. **Cleaner UI** - 4 models instead of 16 in dropdown
+3. **Separation of concerns** - Model selection and thinking level are independent choices
+4. **Consistent mental model** - Same pattern as most multi-tier selection UIs
+
+### Implementation
+
+**ModelSelect.tsx:**
+```typescript
+const THINKING_SUFFIXES = ['-think', '-think-hard', '-ultrathink', '-thinking', '-thinking-high', '-thinking-max']
+
+const filteredModels = settings.chatModels.filter((model) => {
+  if (!(model.enable ?? true)) return false
+  if (model.providerType !== currentProviderType) return false
+  if (isThinkingVariant(model.id)) return false
+  return true
+})
+```
+
+**ThinkingSelect.tsx** (unchanged - already worked):
+- Finds variant model with matching thinking level
+- Switches `chatModelId` to that variant
+
+### Alternatives Considered
+
+#### Single Combined Dropdown
+**Why NOT chosen:**
+- Would show "Claude/Opus 4.5/Ultrathink" as one option
+- Massive list with all combinations
+- Can't independently change thinking level
+- Poor mobile experience
+
+#### Remove Thinking Variants from Constants
+**Why NOT chosen:**
+- Would break settings migrations
+- Existing users have these model IDs saved
+- Lose the ability to have different default thinking levels
+- ThinkingSelect already handles the switching
+
+#### Keep All Models Visible
+**Why NOT chosen:**
+- Confusing UX (select Claude, see GPT models)
+- Too many models in dropdown
+- Thinking variants are redundant with Thinking dropdown
+- User tested and found it cluttered
+
+### Consequences
+- **Positive**: Clean dropdown with only relevant models
+- **Positive**: Thinking variants still work, just hidden
+- **Positive**: Provider selection now meaningful
+- **Positive**: User tested and approved
+- **Negative**: Slightly more complex ModelSelect logic
+- **Pending**: Free checkbox filter not yet implemented
+
+### Verification
+Tested 2025-12-22 at Work:
+- ✅ Model dropdown shows only current provider's base models
+- ✅ Thinking dropdown switches to correct variant
+- ✅ Display shows clean model names (e.g., `opus-4.5`)
+- ✅ User confirmed "it looked great" and "working great"
 
 ---
 

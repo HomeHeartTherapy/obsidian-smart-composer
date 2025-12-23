@@ -46,9 +46,12 @@ const MODEL_SUFFIX_TO_THINKING: Record<string, string> = {
   '-ultrathink': 'max',
 }
 
+// All thinking suffixes (for base model detection)
+const THINKING_SUFFIXES = ['-think', '-think-hard', '-ultrathink', '-thinking', '-thinking-high', '-thinking-max']
+
 // Get the base model ID (without thinking suffix)
 function getBaseModelId(modelId: string): string {
-  for (const suffix of Object.keys(MODEL_SUFFIX_TO_THINKING)) {
+  for (const suffix of THINKING_SUFFIXES) {
     if (modelId.endsWith(suffix)) {
       return modelId.slice(0, -suffix.length)
     }

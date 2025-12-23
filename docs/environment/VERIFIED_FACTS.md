@@ -198,6 +198,22 @@ View type IDs also separated:
 
 ---
 
+## UI Hierarchy Testing
+
+*Tested: 2025-12-22 Evening @ Work (Session 2)*
+
+| Feature | Result | Notes |
+|---------|--------|-------|
+| Model filtering by provider | ✅ **WORKS** | Only shows models for selected provider |
+| Thinking variants hidden | ✅ **WORKS** | Dropdown shows base models only |
+| Thinking dropdown | ✅ **WORKS** | Switches to correct variant model |
+| Clean display names | ✅ **WORKS** | Shows `opus-4.5` not `claude-code/opus-4.5` |
+| User experience | ✅ **APPROVED** | "it looked great" and "working great" |
+
+**Note**: System-wide crash occurred (VS Code, Obsidian, Codex all crashed simultaneously) - confirmed NOT related to our code changes (Electron/GPU issue).
+
+---
+
 ## Update History
 
 | Date | Location | What Was Verified |

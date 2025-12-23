@@ -349,4 +349,63 @@ Failed to fetch extension: vector TypeError: Failed to resolve module specifier 
 
 ---
 
+## Lessons from 2025-12-22 Evening Session (Part 2)
+
+### 10. UI Hierarchy: Top-Down Filtering
+
+**What Happened**: Model dropdown showed ALL models regardless of Provider selection. User could select "Claude" provider but still see GPT models in dropdown.
+
+**Why It Was Wrong**:
+- Confusing UX
+- No connection between controls
+- Thinking variants cluttered the list (16 models when only 4 base models)
+
+**Fix**: Implemented top-down filtering:
+```
+Provider → Connection Type → Model → Thinking
+```
+
+Each level filters what's available below it.
+
+**Key Code**:
+```typescript
+// Filter: only base models for current provider
+const filteredModels = settings.chatModels.filter((model) => {
+  if (model.providerType !== currentProviderType) return false
+  if (isThinkingVariant(model.id)) return false
+  return true
+})
+```
+
+---
+
+### 11. Hide, Don't Delete
+
+**What Happened**: Thinking variants (`-think`, `-think-hard`, `-ultrathink`) were cluttering the model dropdown.
+
+**Initial Thought**: Delete them from constants.
+
+**Why That Was Wrong**:
+- Would break settings migrations
+- Existing users have these model IDs saved
+- ThinkingSelect needs them to exist
+
+**Correct Approach**: Hide from dropdown, but keep in codebase. ThinkingSelect switches to them behind the scenes.
+
+**Lesson**: Sometimes the right solution is hiding, not removing.
+
+---
+
+### 12. System Crashes vs Code Bugs
+
+**What Happened**: Obsidian went black screen while using Power Composer. Seemed like our code caused it.
+
+**Investigation**: VS Code and Codex also crashed at same time.
+
+**Conclusion**: System-level event (GPU driver, Windows memory, etc.). NOT our code.
+
+**Lesson**: When debugging, check if OTHER apps also crashed. If multiple Electron apps die together, it's not your plugin.
+
+---
+
 *Add new lessons as they're learned. This document grows with experience.*

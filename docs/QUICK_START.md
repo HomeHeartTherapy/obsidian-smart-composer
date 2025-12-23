@@ -14,6 +14,7 @@ This is **Power Composer**, a fork of obsidian-smart-composer that adds Claude C
 **Current state**:
 - ✅ Merged, built, deployed
 - ✅ **TESTED & WORKING** at Work (2025-12-22)
+- ✅ UI hierarchy implemented (Provider → Model filtering)
 - 🟡 Home machine: Expected to work (multi-path detection ready)
 - ⏸️ Git push pending user approval
 
@@ -150,6 +151,11 @@ The plugin was tested at Work on 2025-12-22. It SHOULD work at home because:
 3. **Tested models**:
    - claude-code/haiku-4.5 (low thinking) ✅
    - claude-code/opus-4.5 (ultrathink) ✅
+
+4. **UI hierarchy working**:
+   - Model dropdown shows only base models for selected provider
+   - Thinking variants hidden from dropdown
+   - Thinking dropdown controls which variant is used
 
 ### If Claude Code Doesn't Work at Home
 
