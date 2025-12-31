@@ -5,14 +5,22 @@
       "Bash(node esbuild.config.mjs:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(copy /Y \"C:\\Projects\\obsidian-smart-composer-homeheart-UPGRADED\\main.js\" \"C:\\obsidian-test\\.obsidian\\plugins\\smart-composer\\main.js\")",
-      "Bash(cmd /c copy /Y \"C:\\Projects\\obsidian-smart-composer-homeheart-UPGRADED\\main.js\" \"C:\\obsidian-test\\.obsidian\\plugins\\smart-composer\\main.js\")",
-      "Bash(cmd /c \"copy /Y \"\"C:\\Projects\\obsidian-smart-composer-homeheart-UPGRADED\\main.js\"\" \"\"C:\\obsidian-test\\.obsidian\\plugins\\smart-composer\\main.js\"\" && echo Copy successful\")",
       "Bash(powershell:*)",
       "Bash(where claude:*)",
       "Bash(claude --version:*)",
       "Bash(claude /doctor)",
-      "Bash(claude -p \"Say hello in exactly 3 words\" --output-format text --model claude-haiku-4-5-20251001)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(npm config:*)",
+      "Bash(where:*)",
+      "Bash(claude:*)",
+      "Bash(ls:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(del:*)"
     ]
   }
 }

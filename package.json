@@ -1,8 +1,9 @@
 {
-  "name": "obsidian-smart-composer",
+  "name": "obsidian-power-composer",
   "version": "1.2.5",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "description": "AI-powered agentic assistant with Claude Code integration for Obsidian",
   "main": "main.js",
+  "private": true,
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
@@ -13,9 +14,9 @@
     "test": "jest",
     "migrate:compile": "node compile-migration.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
+  "keywords": ["obsidian", "ai", "claude", "claude-code", "agentic"],
+  "author": "Home Heart, LLC <StuartRyan@homehearttherapy.com>",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@types/jest": "^29.5.13",
     "@types/lodash.debounce": "^4.0.9",

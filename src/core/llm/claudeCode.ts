@@ -1,4 +1,5 @@
 import { spawn } from 'child_process'
+import * as path from 'path'
 import { Platform } from 'obsidian'
 
 import { ChatModel } from '../../types/chat-model.types'
@@ -48,11 +49,110 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
     }
   }
 
+  /**
+   * Cached CLI path after auto-detection
+   */
+  private cachedCliPath: string | null = null
+
+  /**
+   * Expand Windows environment variables like %USERPROFILE%
+   */
+  private expandEnvVars(str: string): string {
+    return str.replace(/%([^%]+)%/g, (_, varName) => {
+      return process.env[varName] || `%${varName}%`
+    })
+  }
+
+  /**
+   * List of possible CLI paths to try (populated on first call)
+   */
+  private possibleCliPaths: string[] | null = null
+  private currentPathIndex: number = 0
+
+  /**
+   * Get the CLI path, auto-detecting if not explicitly configured.
+   * Uses a simple approach that works reliably in Electron.
+   */
   private getCliPath(): string {
-    return (
-      this.provider.additionalSettings?.cliPath ||
-      ClaudeCodeProvider.DEFAULT_CLI_PATH
-    )
+    // Return cached path if already resolved
+    if (this.cachedCliPath) {
+      return this.cachedCliPath
+    }
+
+    // If user explicitly set a path, use it (with env var expansion)
+    const configuredPath = this.provider.additionalSettings?.cliPath
+    if (configuredPath && configuredPath.trim() !== '') {
+      this.cachedCliPath = this.expandEnvVars(configuredPath)
+      console.log(`[Claude Code] Using configured path: ${this.cachedCliPath}`)
+      return this.cachedCliPath
+    }
+
+    // Build list of possible paths if not already done
+    if (!this.possibleCliPaths) {
+      this.possibleCliPaths = this.buildPossiblePaths()
+    }
+
+    // Return current path to try
+    const currentPath = this.possibleCliPaths[this.currentPathIndex]
+    console.log(`[Claude Code] Trying path [${this.currentPathIndex + 1}/${this.possibleCliPaths.length}]: ${currentPath}`)
+    return currentPath
+  }
+
+  /**
+   * Called when CLI execution fails - try the next path
+   */
+  private tryNextPath(): boolean {
+    if (!this.possibleCliPaths) return false
+
+    this.currentPathIndex++
+    if (this.currentPathIndex < this.possibleCliPaths.length) {
+      console.log(`[Claude Code] Path failed, trying next...`)
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Called when CLI execution succeeds - cache the working path
+   */
+  private cacheWorkingPath(): void {
+    if (this.possibleCliPaths && this.currentPathIndex < this.possibleCliPaths.length) {
+      this.cachedCliPath = this.possibleCliPaths[this.currentPathIndex]
+      console.log(`[Claude Code] Caching working path: ${this.cachedCliPath}`)
+    }
+  }
+
+  /**
+   * Build list of possible CLI paths based on platform
+   */
+  private buildPossiblePaths(): string[] {
+    const userProfile = process.env.USERPROFILE || process.env.HOME || ''
+
+    if (process.platform === 'win32') {
+      return [
+        // Standalone installer location (WORK machine - verified 2025-12-22)
+        path.join(userProfile, '.local', 'bin', 'claude.exe'),
+        // Standard npm global (with admin) - HOME machine
+        path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
+        // Common non-admin npm prefix locations
+        path.join(userProfile, 'npm', 'claude.cmd'),
+        path.join(userProfile, '.npm-global', 'claude.cmd'),
+        path.join(userProfile, 'AppData', 'Local', 'npm', 'claude.cmd'),
+        // Direct in user profile (some custom setups)
+        path.join(userProfile, 'claude.cmd'),
+        path.join(userProfile, 'bin', 'claude.cmd'),
+        // Fallback to just 'claude' hoping it's in PATH
+        'claude',
+      ]
+    } else {
+      return [
+        '/usr/local/bin/claude',
+        '/usr/bin/claude',
+        path.join(userProfile, '.npm-global', 'bin', 'claude'),
+        path.join(userProfile, '.local', 'bin', 'claude'),
+        'claude',
+      ]
+    }
   }
 
   /**
@@ -139,13 +239,15 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
   ): Promise<string> {
     return new Promise((resolve, reject) => {
       const cliPath = this.getCliPath()
+      // Don't pass prompt as arg - Windows has ~8191 char limit
+      // Instead, we'll pipe it via stdin
       const args = [
         '-p', // print mode (non-interactive)
         '--output-format',
         'text',
         '--model',
         modelName,
-        prompt,
+        '-', // Read prompt from stdin
       ]
 
 
@@ -153,18 +255,26 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
       const shellEnv = this.getShellEnv()
 
       const child = spawn(cliPath, args, {
-        // Critical: Use 'inherit' for stdin to avoid Node.js hanging issue
-        // See: https://github.com/anthropics/claude-code/issues/771
-        stdio: ['inherit', 'pipe', 'pipe'],
+        // Use 'pipe' for stdin so we can write the prompt
+        stdio: ['pipe', 'pipe', 'pipe'],
         env: {
           ...shellEnv,
           // Critical: Set ANTHROPIC_API_KEY to empty string
           // Without this, Node.js spawn hangs indefinitely
           ANTHROPIC_API_KEY: '',
         },
+        // Critical for Windows: shell:true required to run .cmd files
+        // Without this, spawn throws EINVAL on Windows
+        shell: process.platform === 'win32',
         // Don't create a console window on Windows
         windowsHide: true,
       })
+
+      // Write prompt to stdin and close it
+      if (child.stdin) {
+        child.stdin.write(prompt)
+        child.stdin.end()
+      }
 
       let stdout = ''
       let stderr = ''
@@ -187,6 +297,8 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
 
       child.on('close', (code) => {
         if (code === 0) {
+          // Success! Cache this working path
+          this.cacheWorkingPath()
           resolve(stdout.trim())
         } else {
           // Parse error messages
@@ -197,13 +309,24 @@ export class ClaudeCodeProvider extends BaseLLMProvider<
 
       child.on('error', (error) => {
         if (error.message.includes('ENOENT')) {
-          reject(
-            new Error(
-              `Claude Code CLI not found at "${cliPath}". ` +
-                'Please install it with: npm install -g @anthropic-ai/claude-code\n' +
-                'Then login with: claude login',
-            ),
-          )
+          // Path not found - try next path if available
+          if (this.tryNextPath()) {
+            // Retry with next path
+            this.executeClaudeCli(prompt, modelName, signal)
+              .then(resolve)
+              .catch(reject)
+          } else {
+            // All paths exhausted
+            const triedPaths = this.possibleCliPaths?.join('\n  - ') || cliPath
+            reject(
+              new Error(
+                `Claude Code CLI not found. Tried paths:\n  - ${triedPaths}\n\n` +
+                  'Please install it with: npm install -g @anthropic-ai/claude-code\n' +
+                  'Then login with: claude login\n\n' +
+                  'Or set the CLI path manually in Smart Composer settings.',
+              ),
+            )
+          }
         } else {
           reject(new Error(`Failed to execute Claude Code CLI: ${error.message}`))
         }
