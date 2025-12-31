@@ -25,6 +25,10 @@ This document captures the significant architectural decisions made for the Obsi
 13. [ADR-013: Schema Validation - Zod](#adr-013-schema-validation---zod)
 14. [ADR-014: Diff Algorithm - vscode-diff](#adr-014-diff-algorithm---vscode-diff)
 15. [ADR-015: Fuzzy Search - fuzzysort](#adr-015-fuzzy-search---fuzzysort)
+16. [ADR-016: Console Debug Logging for Model Verification](#adr-016-console-debug-logging-for-model-verification)
+17. [ADR-017: Extended Thinking Variants for Anthropic API](#adr-017-extended-thinking-variants-for-anthropic-api)
+18. [ADR-018: Two-Row UI Layout for Chat Input](#adr-018-two-row-ui-layout-for-chat-input)
+19. [ADR-019: Claude Code CLI Path Auto-Detection](#adr-019-claude-code-cli-path-auto-detection)
 
 ---
 
@@ -1389,6 +1393,7 @@ const results = fuzzysort.go(query, templates, { key: 'name', threshold: 0.2 })
 | 016 | Console Debug Logging | Human-readable model verification |
 | 017 | Extended Thinking Variants | Budget-based thinking for Anthropic API |
 | 018 | Two-Row UI Layout | VS Code Copilot-style dropdown controls |
+| 019 | CLI Path Auto-Detection | Zero-config, cross-machine compatible |
 
 ---
 
@@ -1652,6 +1657,139 @@ const THINKING_OPTIONS: Record<string, ThinkingOption[]> = {
 - **Positive**: Easy to switch API/Subscription for same model family
 - **Negative**: More UI components to maintain
 - **Negative**: Need to keep provider groupings updated as new providers added
+
+---
+
+## ADR-019: Claude Code CLI Path Auto-Detection
+
+### Status
+**Accepted**
+
+### Context
+The Claude Code provider wraps the `claude` CLI to use Max/Pro subscriptions without API keys. The plugin needs to find the CLI executable, but:
+- Different machines have different npm installation paths
+- Work machines may use custom npm prefixes (no admin rights)
+- User profiles vary (`C:\Users\stuart.ryan` vs `C:\Users\StuartRyan`)
+- GUI apps (Obsidian/Electron) may not inherit terminal PATH
+- Windows environment variables (`%USERPROFILE%`) need expansion
+
+### Decision
+Implement **multi-strategy path resolution** with caching:
+
+1. **Configured path** (if set) with environment variable expansion
+2. **File system probing** of 12+ common installation locations
+3. **System command fallback** (`where claude` / `which claude`)
+4. **Default fallback** to hoping `claude` is in PATH
+
+```typescript
+private getCliPath(): string {
+  if (this.cachedCliPath) return this.cachedCliPath
+
+  // 1. User-configured path with env var expansion
+  if (configuredPath) {
+    return this.expandEnvVars(configuredPath)
+  }
+
+  // 2. Check common installation paths
+  const possiblePaths = [
+    path.join(userProfile, 'AppData', 'Roaming', 'npm', 'claude.cmd'),
+    path.join(userProfile, 'npm', 'claude.cmd'),
+    path.join(userProfile, 'bin', 'claude'),
+    // ... 12+ paths
+  ]
+
+  for (const tryPath of possiblePaths) {
+    if (fs.existsSync(tryPath)) return tryPath
+  }
+
+  // 3. Try where/which command
+  const result = execSync('where claude')
+  if (result) return result
+
+  // 4. Fall back to 'claude'
+  return 'claude'
+}
+```
+
+### Rationale
+This approach was chosen because:
+1. **Zero configuration for most users** - Auto-detection handles common cases
+2. **Works across machines** - Different profiles, npm setups, platforms
+3. **Handles GUI app PATH limitations** - Doesn't rely on inherited PATH
+4. **Supports power users** - Explicit path override still available
+5. **Fast after first call** - Caching prevents repeated file system checks
+
+### Alternatives Considered
+
+#### Rely on PATH Only
+**Why NOT chosen:**
+- GUI apps often don't inherit terminal PATH
+- User PATH may not be available to Electron
+- Requires user to restart Obsidian after installing claude
+- No feedback about why it failed
+
+#### Require Explicit Configuration
+**Why NOT chosen:**
+- Poor user experience (everyone must configure)
+- Path varies between machines (breaks sync)
+- Users don't know where npm installs globally
+- Adds friction to getting started
+
+#### Use npm Programmatically
+**Why NOT chosen:**
+- `npm config get prefix` requires npm in PATH
+- Adds npm as runtime dependency
+- Slower than file system check
+- May not work in Electron context
+
+#### Store Different Paths per Machine
+**Why NOT chosen:**
+- Complicates settings structure
+- Requires machine identification logic
+- Settings sync would be complex
+- Auto-detection eliminates the need
+
+### Implementation Notes
+
+**Environment variable expansion:**
+```typescript
+private expandEnvVars(str: string): string {
+  return str.replace(/%([^%]+)%/g, (_, varName) => {
+    return process.env[varName] || `%${varName}%`
+  })
+}
+```
+
+**Paths checked (in order):**
+1. `%USERPROFILE%\AppData\Roaming\npm\claude.cmd` (standard Windows)
+2. `%USERPROFILE%\npm\claude.cmd` (custom npm prefix)
+3. `%USERPROFILE%\node_modules\.bin\claude.cmd` (local install)
+4. `%USERPROFILE%\bin\claude` (Unix-style)
+5. `%USERPROFILE%\AppData\Roaming\nvm\current\claude.cmd` (nvm-windows)
+6. `/usr/local/bin/claude` (macOS/Linux)
+7. `~/.npm-global/bin/claude` (custom global on Unix)
+8. ... and more
+
+**Logging:**
+```typescript
+console.log(`[Claude Code] Auto-detected CLI at: ${tryPath}`)
+```
+Users can check Obsidian dev console to see which path was found.
+
+### Consequences
+- **Positive**: Works out of the box on most machines
+- **Positive**: Syncs safely between different machines
+- **Positive**: Clear logging for debugging
+- **Positive**: Power users can override
+- **Negative**: File system probing adds ~10ms first call
+- **Negative**: New installation locations require code update
+
+### Related ADRs
+- ADR-006: LLM Provider Architecture (Claude Code is a provider)
+- ADR-007: Settings Storage (cliPath stored in settings)
+
+### Date
+December 2024
 
 ---
 

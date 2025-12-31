@@ -97,6 +97,59 @@ Persistent task tracking for the Smart Composer HomeHeart Fork.
 
 ---
 
+## Feature Ideas (Future)
+
+### Agentic Mode Switch
+
+**Goal**: Add a toggle to switch between two modes:
+
+#### Mode 1: Chat Mode (Current Smart Composer behavior)
+- AI chat with vault context
+- Writing assistance
+- One-click edits
+- Standard conversational interface
+
+#### Mode 2: Agentic Mode (Claude Code style)
+- Multi-step task execution
+- File creation/modification
+- Command execution within vault
+- "Go make me a JavaScript metabind, add it to the right file, hardwire it to note toolbar"
+- Uses same Claude Code CLI wrapper (no additional API costs)
+
+**Implementation Ideas**:
+- Settings toggle: `mode: 'chat' | 'agentic'`
+- UI Toggle: Ribbon icon, dropdown in composer header, or keyboard shortcut
+- Same Claude Code CLI wrapper for both modes
+- Clear visual indicator of current mode
+
+---
+
+### Scrolling Chat Review & Prompt Engineering Tool
+
+**Goal**: Turn the history review function into a full-fledged modern "Scrolling Chat Review" with comprehensive editing and analysis capabilities.
+
+**Core Features**:
+- **Full Edit/Copy/Save/Paste**: Complete control over conversation history
+- **Timeline Scrolling**: Scroll through time and navigate conversation history
+- **Prompt Comparison**: Compare results of different prompts side-by-side
+- **Statistics Dashboard**:
+  - Response times
+  - Token usage
+  - Success/failure rates
+  - Model performance metrics
+
+**Prompt Engineering Tool** (Additional Use Case):
+- **Version Control for Prompts**: Track prompt iterations and changes
+- **A/B Testing**: Compare prompt variations and their outputs
+- **Model Matching**: Identify which prompts work best with which models
+- **Performance Statistics**:
+  - Track prompt effectiveness over time
+  - Measure response quality metrics
+  - Identify patterns in successful prompts
+- **Export/Import**: Share and reuse optimized prompts
+
+---
+
 ## Technical Debt
 
 | Item | Location | Impact | Priority |

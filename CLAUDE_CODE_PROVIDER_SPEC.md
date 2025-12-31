@@ -717,6 +717,51 @@ Claude Code uses keyword triggers in the prompt:
 
 **Source:** https://github.com/anthropics/claude-code/issues/7668
 
+### 8.4 CLI Path Auto-Detection
+
+The plugin automatically finds the Claude CLI without user configuration.
+
+**Detection Strategy:**
+1. Check user-configured path (with `%ENV_VAR%` expansion)
+2. Probe common installation locations
+3. Fall back to `where claude` / `which claude`
+4. Last resort: hope `claude` is in PATH
+
+**Paths Checked (in order):**
+```
+%USERPROFILE%\AppData\Roaming\npm\claude.cmd    # Standard Windows npm
+%USERPROFILE%\npm\claude.cmd                     # Custom npm prefix
+%USERPROFILE%\node_modules\.bin\claude.cmd       # Local install
+%USERPROFILE%\bin\claude.cmd                     # Unix-style
+%USERPROFILE%\AppData\Roaming\nvm\current\claude.cmd  # nvm-windows
+/usr/local/bin/claude                            # macOS/Linux
+~/.npm-global/bin/claude                         # Custom global Unix
+```
+
+**Why Auto-Detection:**
+- GUI apps (Obsidian/Electron) don't inherit terminal PATH
+- Different machines have different npm configurations
+- Work machines may use custom prefixes (no admin rights)
+- Settings sync between machines with different paths
+
+**Environment Variable Expansion:**
+```typescript
+// Converts %USERPROFILE%\path to C:\Users\Name\path
+private expandEnvVars(str: string): string {
+  return str.replace(/%([^%]+)%/g, (_, varName) => {
+    return process.env[varName] || `%${varName}%`
+  })
+}
+```
+
+**Debugging:**
+Check Obsidian dev console (Ctrl+Shift+I) for:
+```
+[Claude Code] Auto-detected CLI at: C:\Users\...\claude.cmd
+```
+
+**Related ADR:** ADR-019: Claude Code CLI Path Auto-Detection
+
 ---
 
 ## 9. Error Handling
