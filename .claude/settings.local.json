@@ -1,26 +1,11 @@
-{
+☻{
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Bash(node esbuild.config.mjs:*)",
-      "Bash(dir:*)",
-      "Bash(findstr:*)",
-      "Bash(powershell:*)",
-      "Bash(where claude:*)",
-      "Bash(claude --version:*)",
-      "Bash(claude /doctor)",
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git push:*)",
-      "Bash(git checkout:*)",
-      "Bash(git merge:*)",
-      "Bash(npm config:*)",
-      "Bash(where:*)",
-      "Bash(claude:*)",
-      "Bash(ls:*)",
-      "Bash(npm install)",
-      "Bash(npm install:*)",
-      "Bash(del:*)"
-    ]
+      "Bash",
+      "Read",
+      "Write",
+      "Edit"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
